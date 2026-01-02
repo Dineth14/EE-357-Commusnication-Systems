@@ -4,4 +4,6 @@ This repository contains the implementations , theorectical analysis and simulat
 
 repo structure:
 - AM_Modulation.py
+- DSB_SC_Modulation.py  
+- Square_Law_Modulation.py
 - README.md
