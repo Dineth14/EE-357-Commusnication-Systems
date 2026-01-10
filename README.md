@@ -28,6 +28,10 @@ Contains scripts for Pulse Modulation and Sampling Theory.
     - Demonstrates the sampling theorem.
     - Visualizes the time-domain chopping and frequency-domain harmonics.
     - Implements Product Detection and Low Pass Filtering for signal recovery.
+- **[Flat_Top_Sampling.py](Sampling/Flat_Top_Sampling.py)**: Simulates Flat Top Sampling.
+    - Implements "Sample and Hold" logic.
+    - Visualizes the **Aperture Effect** in the frequency domain (spectrum shaping by sinc function).
+    - Includes reconstruction via Low Pass Filtering.
 
 #### 3. Output Plots (`/Output_Plots`)
 Stores generated plots from the simulations.
