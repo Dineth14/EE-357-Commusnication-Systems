@@ -6,4 +6,5 @@ repo structure:
 - AM_Modulation.py
 - DSB_SC_Modulation.py  
 - Square_Law_Modulation.py
+- Natural_sampling.py
 - README.md
