@@ -21,6 +21,12 @@ Contains scripts for Analog Amplitude Modulation techniques.
 - **[AM_Modulation.py](Modulation/AM_Modulation.py)**: Basic Amplitude Modulation implementation.
 - **[DSB_SC_Modulation.py](Modulation/DSB_SC_Modulation.py)**: Double Sideband Suppressed Carrier (DSB-SC) modulation.
 - **[Square_Law_Modulation.py](Modulation/Square_Law_Modulation.py)**: Implementation of AM generation using a non-linear device (Square Law Modulator).
+- **[PWM.py](Modulation/PWM.py)**: Pulse Width Modulation.
+    - Implements Trailing-Edge PWM using the rigorous summation formula.
+    - Includes demodulation via LPF.
+- **[PPM.py](Modulation/PPM.py)**: Pulse Position Modulation.
+    - Implements shifted-center PPM ($t_{center} = nT_s + k_p m(t)$).
+    - Demonstrates demodulation by converting to PWM first.
 
 #### 2. Sampling (`/Sampling`)
 Contains scripts for Pulse Modulation and Sampling Theory.
