@@ -60,47 +60,56 @@ for n in range(num_pulses):
 # Strategy: PPM -> PWM -> LPF
 # Convert PPM to PWM:
 # Set High at Clock Tick (n*Ts)
-# Reset Low at PPM Pulse Rising Edge (or Center)
-# This creates a trailing edge PWM where Width = Delay.
-# Delay = kp * m(nT) + Offset. Width is proportional to Signal.
+# Reset Low at PPM Pulse Leading Edge
 
 pwm_conv = np.zeros_like(t)
 current_state = 0
-next_clock_idx = 0
 
-# Naive conversion loop
-# If t is at clock tick, set High.
-# If t is at PPM pulse start, set Low.
-# We can iterate samples.
-for i in range(len(t)):
-    # Check for Clock Tick
-    if (i % int(Ts * f_sim)) == 0:
-        current_state = 1 # Set High
+# Edge Detection Loop
+# efficient iteration
+clock_period_samples = int(f_sim * Ts)
+
+for i in range(1, len(t)):
+    # 1. Synchronization (Clock Tick)
+    # Using modulo logic or pre-calculated clock ticks
+    if (i % clock_period_samples) == 0:
+        current_state = 1
         
-    # Check for PPM accumulation (Pulse arrival)
-    # If PPM signal goes high (rising edge), we reset our PWM.
-    # Simple logic: If ppm_signal[i] == 1 and current_state == 1:
-    # Wait, PPM pulse center represents value. Rising edge represents value - tau/2.
-    # As long as tau is constant, rising edge works.
-    if ppm_signal[i] > 0.5 and current_state == 1:
-        current_state = 0 # Reset Low
+    # 2. Reset on PPM Pulse (Rising Edge)
+    # Detect rising edge: current is high, previous was low
+    if ppm_signal[i] > 0.5 and ppm_signal[i-1] < 0.5 and current_state == 1:
+        current_state = 0
         
     pwm_conv[i] = current_state
 
-# Now LPF the converted PWM
-cutoff = 4 * fm
-b, a = signal.butter(4, cutoff / (f_sim / 2), btype='low')
+# Filter Design
+# A high order Butterworth can cause ringing on step inputs.
+# Let's use a 2nd order filter or Bessel (better group delay/no ringing).
+# Or just lower the cutoff slightly.
+cutoff = 2 * fm # Nyquist is 2*fm, usually we want some buffer. 
+# Previous was 4*fm, might let too much switching noise through.
+# Let's try 3rd order Butterworth.
+b, a = signal.butter(3, cutoff / (f_sim / 2), btype='low')
 demod_signal = signal.filtfilt(b, a, pwm_conv)
 
-# Normalize
+# Normalization and Offset Removal
+# Remove DC
 demod_ac = demod_signal - np.mean(demod_signal)
+
+# Scale to match original message for comparison
+# Check correlation to determine sign
+correlation = np.mean(demod_ac * m_t)
+sign = np.sign(correlation)
+if np.abs(correlation) < 1e-10: sign = 1
+
 scale_factor = np.max(np.abs(m_t)) / (np.max(np.abs(demod_ac)) + 1e-6)
-demod_final = demod_ac * scale_factor * -1 # Inversion might happen depending on logic (Delay proportional to signal vs inverse)
-# Start of pulse is fixed, End is variable. Delay increases with signal (+m -> delayed -> wider pulse).
-# Wait, if Delay increases (Center moves right), pulse arrives LATER.
-# So PWM width (Start to Pulse Arrival) INCREASES. 
-# So Large Signal -> Large Delay -> Large PWM Width.
-# Should be non-inverted. We'll check plot.
+demod_final = demod_ac * scale_factor * sign
+
+# Tuning note: If "distorted", it might be phase shift? 
+# filtfilt removes phase shift. 
+# It might be the "staircase" nature of PWM conversion being filtered. 
+# Increasing f_sim would help resolution but is computationally expensive.
+# The current f_sim=10000 with fs=200 gives 50 samples/cycle, which is usually sufficient.
 
 # Plotting
 plt.figure(figsize=(14, 12))
@@ -115,20 +124,22 @@ plt.xlim(0, 0.2)
 # PPM
 plt.subplot(4, 1, 2)
 # Plot clock ticks for reference
-for n in range(num_pulses):
+for n in range(int(duration/Ts)):
     plt.axvline(n*Ts, color='k', linestyle=':', alpha=0.3)
 plt.plot(t, ppm_signal, 'b', label='PPM Signal')
 plt.title(f'PPM Signal (Shifted Center). Fixed $\\tau={tau*1000:.1f}$ms')
 plt.ylabel('Amplitude')
 plt.grid(True)
 plt.xlim(0, 0.2)
+plt.ylim(-0.2, 1.2)
 
 # Converted PWM
 plt.subplot(4, 1, 3)
 plt.step(t, pwm_conv, where='post', color='r', linewidth=1, label='Converted PWM')
-plt.title('Internal PPM-to-PWM Conversion')
+plt.title('Internal PPM-to-PWM Conversion (Variable Width)')
 plt.grid(True)
 plt.xlim(0, 0.2)
+plt.ylim(-0.2, 1.2)
 
 # Demod
 plt.subplot(4, 1, 4)
