@@ -27,6 +27,9 @@ Contains scripts for Analog Amplitude Modulation techniques.
 - **[PPM.py](Modulation/PPM.py)**: Pulse Position Modulation.
     - Implements shifted-center PPM ($t_{center} = nT_s + k_p m(t)$).
     - Demonstrates demodulation by converting to PWM first.
+- **[SSB_Modulation.py](Modulation/SSB_Modulation.py)**: Single Sideband Modulation.
+    - Implements the Phase Shift Method (Hilbert Transform).
+    - Demonstrates cancellation of undesired sideband to generate USSB or LSSB.
 
 #### 2. Sampling (`/Sampling`)
 Contains scripts for Pulse Modulation and Sampling Theory.
