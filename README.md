@@ -44,6 +44,12 @@ Contains scripts for Pulse Modulation and Sampling Theory.
 
 #### 3. Output Plots (`/Output_Plots`)
 Stores generated plots from the simulations.
+
+#### 4. Labs (`/labs`)
+Contains solutions and simulations for laboratory assignments.
+- **[Lab1_Solutions.md](labs/Lab1_Solutions.md)**: Mathematical derivations for Lab 1.
+- **[Lab1_Simulation.py](labs/Lab1_Simulation.py)**: Python script to verify Lab 1 results.
+
 - Check [Output_Plots/README.md](Output_Plots/README.md) for details on the visualization results.
 
 ### Usage
