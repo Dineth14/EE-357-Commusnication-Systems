@@ -41,6 +41,10 @@ Contains scripts for Pulse Modulation and Sampling Theory.
     - Implements "Sample and Hold" logic.
     - Visualizes the **Aperture Effect** in the frequency domain (spectrum shaping by sinc function).
     - Includes reconstruction via Low Pass Filtering.
+- **[PCM.py](Sampling/PCM.py)**: Pulse Code Modulation simulation.
+    - Demonstrates Sampling and Uniform Quantization ($n$ bits).
+    - Calculates Quantization Error and Signal-to-Noise Ratio (SNR).
+    - Verifies the $6$ dB/bit improvement rule.
 
 #### 3. Output Plots (`/Output_Plots`)
 Stores generated plots from the simulations.
