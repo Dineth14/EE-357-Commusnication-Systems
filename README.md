@@ -54,6 +54,10 @@ Contains solutions and simulations for laboratory assignments.
 - **[Lab1_Solutions.md](labs/Lab1_Solutions.md)**: Mathematical derivations for Lab 1.
 - **[Lab1_Simulation.py](labs/Lab1_Simulation.py)**: Python script to verify Lab 1 results.
 
+#### 5. Tutorials (`/Tutorials`)
+- **[Tutorial1_Solutions.md](Tutorials/Tutorial1_Solutions.md)**: Solutions for Line Coding waveforms.
+- **[Tutorial1_LineCodes.py](Tutorials/Tutorial1_LineCodes.py)**: Simulation of NRZ, RZ, and Manchester codes.
+
 - Check [Output_Plots/README.md](Output_Plots/README.md) for details on the visualization results.
 
 ### Usage
