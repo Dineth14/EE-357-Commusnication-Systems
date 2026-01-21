@@ -56,13 +56,13 @@ def logic_bipolar_rz_factory():
 # 4. Manchester NRZ
 def logic_manchester(sig, b, start, mid, end):
     if b == 1:
-        # 1: High -> Low
-        sig[start:mid] = 1
-        sig[mid:end] = -1
-    else:
-        # 0: Low -> High
+        # 1: Low -> High (IEEE Convention)
         sig[start:mid] = -1
         sig[mid:end] = 1
+    else:
+        # 0: High -> Low
+        sig[start:mid] = 1
+        sig[mid:end] = -1
 
 # Generate Signals
 sig_unrz = get_waveform(logic_unipolar_nrz)

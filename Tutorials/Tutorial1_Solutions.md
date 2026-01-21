@@ -26,8 +26,8 @@ Draw the signaling waveform for the following input:
 
 ### 4. Manchester NRZ (Split-Phase)
 - **Logic**:
-  - `1`: High-to-Low transition in the middle of the bit ($+A \to -A$).
-  - `0`: Low-to-High transition in the middle of the bit ($-A \to +A$).
+  - `1`: Low-to-High transition in the middle of the bit ($-A \to +A$).
+  - `0`: High-to-Low transition in the middle of the bit ($+A \to -A$).
 - **Description**: Every bit has a transition in the middle, ensuring excellent synchronization.
 
 ---
@@ -36,12 +36,12 @@ Draw the signaling waveform for the following input:
 
 | Bit | Unipolar NRZ | Unipolar RZ | Bipolar RZ | Manchester NRZ |
 | :--- | :--- | :--- | :--- | :--- |
-| **1** | High | High $\to$ Low | $+A \to 0$ | High $\to$ Low |
-| **0** | Low | Low | $0$ | Low $\to$ High |
-| **1** | High | High $\to$ Low | $-A \to 0$ | High $\to$ Low |
-| **0** | Low | Low | $0$ | Low $\to$ High |
-| **0** | Low | Low | $0$ | Low $\to$ High |
-| **0** | Low | Low | $0$ | Low $\to$ High |
-| **1** | High | High $\to$ Low | $+A \to 0$ | High $\to$ Low |
-| **1** | High | High $\to$ Low | $-A \to 0$ | High $\to$ Low |
-| **0** | Low | Low | $0$ | Low $\to$ High |
+| **1** | High | High $\to$ Low | $+A \to 0$ | Low $\to$ High |
+| **0** | Low | Low | $0$ | High $\to$ Low |
+| **1** | High | High $\to$ Low | $-A \to 0$ | Low $\to$ High |
+| **0** | Low | Low | $0$ | High $\to$ Low |
+| **0** | Low | Low | $0$ | High $\to$ Low |
+| **0** | Low | Low | $0$ | High $\to$ Low |
+| **1** | High | High $\to$ Low | $+A \to 0$ | Low $\to$ High |
+| **1** | High | High $\to$ Low | $-A \to 0$ | Low $\to$ High |
+| **0** | Low | Low | $0$ | High $\to$ Low |
