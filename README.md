@@ -46,8 +46,13 @@ Contains scripts for Pulse Modulation and Sampling Theory.
     - Calculates Quantization Error and Signal-to-Noise Ratio (SNR).
     - Verifies the $6$ dB/bit improvement rule.
 
-#### 3. Output Plots (`/Output_Plots`)
-Stores generated plots from the simulations.
+#### 6. Notes (`/notes`)
+- **[SSB_Theory.md](notes/SSB_Theory.md)**: Detailed notes on SSB applications, the "Horn" problem, and Generation Methods (Filter, Hartley, Weaver).
+
+#### New Simulations
+- **[SSB_Analysis.py](Modulation/SSB_Analysis.py)**: Advanced SSB analysis.
+    - Demonstrates the **Horn Effect** (Hilbert transform singularities).
+    - Simulates **Weaver's Method** for SSB generation.
 
 #### 4. Labs (`/labs`)
 Contains solutions and simulations for laboratory assignments.
