@@ -48,11 +48,15 @@ Contains scripts for Pulse Modulation and Sampling Theory.
 
 #### 6. Notes (`/notes`)
 - **[SSB_Theory.md](notes/SSB_Theory.md)**: Detailed notes on SSB applications, the "Horn" problem, and Generation Methods (Filter, Hartley, Weaver).
+- **[VSB_Theory.md](notes/VSB_Theory.md)**: Notes on VSB Modulation (Symmetry Condition) and Frequency Mixing.
 
 #### New Simulations
 - **[SSB_Analysis.py](Modulation/SSB_Analysis.py)**: Advanced SSB analysis.
     - Demonstrates the **Horn Effect** (Hilbert transform singularities).
     - Simulates **Weaver's Method** for SSB generation.
+- **[VSB_Mixing_Analysis.py](Modulation/VSB_Mixing_Analysis.py)**: VSB and Mixing analysis.
+    - Visualizes VSB Filter Symmetry.
+    - Demonstrates Frequency Translation (Up/Down Conversion).
 
 #### 4. Labs (`/labs`)
 Contains solutions and simulations for laboratory assignments.
