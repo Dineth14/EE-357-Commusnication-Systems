@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 # Parameters
 f1 = 500.0
 f2 = 500.0 * np.sqrt(2)
-fc = 20000.0  # Carrier frequency (chosen for visualization, not given)
+fc = f2       # Carrier frequency is f2
 Ac = 100.0    # Carrier Amplitude
 
-fs = 200000.0 # Sampling rate (high enough for carrier)
-duration = 0.0002 # Short duration to see waveform details (20ms = 10 cycles of f1)
+fs = 200000.0 # Sampling rate
+duration = 0.01 # 10ms
 t = np.arange(0, duration, 1/fs)
 
 # Frequencies in rad/s
@@ -17,17 +17,18 @@ w2 = 2 * np.pi * f2
 wc = 2 * np.pi * fc
 
 # Message Signal
-# Note: Assuming second term is w2 based on provided f2
-m_t = 0.2 * np.sin(w1 * t) + 0.5 * np.cos(w2 * t)
+# User specified: omega in message signal is equal for cos and sine terms (w1)
+m_t = 0.2 * np.sin(w1 * t) + 0.5 * np.cos(w1 * t)
 
 # AM Signal
 # s(t) = (Ac + m(t)) cos(wc t)
 s_t = (Ac + m_t) * np.cos(wc * t)
 
 # Modulation Percentage
-# mu = (max(|m(t)|) / Ac) * 100
-# The theoretical max of m(t) is sum of amplitudes since frequencies are irrational
-max_m = 0.2 + 0.5
+# m(t) = 0.2 sin(w1 t) + 0.5 cos(w1 t)
+# This is a single sinusoid of form R cos(w1 t - phi)
+# R = sqrt(0.2^2 + 0.5^2)
+max_m = np.sqrt(0.2**2 + 0.5**2)
 mu = (max_m / Ac) * 100
 
 print(f"Modulation Percentage: {mu:.2f}%")
@@ -52,7 +53,7 @@ plt.savefig('AM_Waveform.png')
 # Need longer duration for better frequency resolution
 T_spec = 1.0 
 t_spec = np.arange(0, T_spec, 1/fs)
-m_t_spec = 0.2 * np.sin(w1 * t_spec) + 0.5 * np.cos(w2 * t_spec)
+m_t_spec = 0.2 * np.sin(w1 * t_spec) + 0.5 * np.cos(w1 * t_spec)
 s_t_spec = (Ac + m_t_spec) * np.cos(wc * t_spec)
 
 N = len(s_t_spec)
@@ -63,10 +64,6 @@ xf = np.fft.fftfreq(N, 1/fs)
 yf_shifted = np.fft.fftshift(yf)
 xf_shifted = np.fft.fftshift(xf)
 magnitude = np.abs(yf_shifted) / N
-
-# Theory says sidebands magnitude is related to m(t) coeffs / 2
-# Ac term -> Ac/2 at +/- fc (since we look at one side or normalized)
-# Actually FFT outputs A/2 for sinusoids A cos(wt) in two-sided spectrum
 
 plt.figure(figsize=(12, 6))
 # Only plot positive frequencies around carrier
@@ -79,16 +76,13 @@ plt.grid(True)
 
 # Annotations
 plt.axvline(x=fc, color='r', linestyle='--', alpha=0.3)
-plt.text(fc, np.max(magnitude), f'$f_c$ ({Ac/2})', ha='center', va='bottom')
+plt.text(fc, np.max(magnitude), f'$f_c={fc:.1f}$', ha='center', va='bottom')
 
-# Sidebands
-# f1
-plt.annotate(f'$f_c+f_1$', xy=(fc+f1, 0.2/4), xytext=(fc+f1, 5), arrowprops=dict(arrowstyle='->'))
-plt.annotate(f'$f_c-f_1$', xy=(fc-f1, 0.2/4), xytext=(fc-f1, 5), arrowprops=dict(arrowstyle='->'))
-
-# f2
-plt.annotate(f'$f_c+f_2$', xy=(fc+f2, 0.5/4), xytext=(fc+f2, 10), arrowprops=dict(arrowstyle='->'))
-plt.annotate(f'$f_c-f_2$', xy=(fc-f2, 0.5/4), xytext=(fc-f2, 10), arrowprops=dict(arrowstyle='->'))
+# Sidebands (Only f1 exists now)
+# Combined amplitude of m(t) is R = sqrt(0.2^2 + 0.5^2) = 0.5385
+# Sideband amplitude = R/2 = 0.269
+plt.annotate(f'$f_c+f_1$', xy=(fc+f1, 0.269), xytext=(fc+f1, 0.4), arrowprops=dict(arrowstyle='->'))
+plt.annotate(f'$f_c-f_1$', xy=(fc-f1, 0.269), xytext=(fc-f1, 0.4), arrowprops=dict(arrowstyle='->'))
 
 plt.tight_layout()
 plt.savefig('AM_Spectrum.png')
