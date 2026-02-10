@@ -29,7 +29,7 @@ s_t = (Ac + m_t_mod) * np.cos(2 * np.pi * fc * t)
 local_carrier = np.cos(2 * np.pi * fc * t)
 v_t = s_t * local_carrier
 
-# Step B: Low Pass Filter
+# Step B: Low Pass Filter (Specifics: 5kHz cutoff, 2nd order)
 def butter_lowpass_filter(data, cutoff, fs, order=5):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
@@ -37,8 +37,8 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     y = filtfilt(b, a, data)
     return y
 
-# Cutoff > fm but < fc. 2kHz is safe.
-demodulated_raw = butter_lowpass_filter(v_t, 2500, fs)
+# Cutoff = 5 kHz, Order = 2
+demodulated_raw = butter_lowpass_filter(v_t, 5000, fs, order=2)
 
 # Remove DC Component (0.5 * Ac) to recover AC message
 demodulated_ac = demodulated_raw - np.mean(demodulated_raw)
@@ -47,36 +47,43 @@ demodulated_ac = demodulated_raw - np.mean(demodulated_raw)
 demodulated_scaled = demodulated_ac * 2
 
 # Plotting
-plt.figure(figsize=(12, 12))
+plt.figure(figsize=(12, 14))
 
-# 1. Message Signal (Part 1)
-plt.subplot(4, 1, 1)
-plt.plot(t * 1000, m_t_basic, 'b')
-plt.title(f'Message Signal $m(t)$ ($A_m=1$V, $f_m=1$kHz)')
+# 1. Message Signal
+plt.subplot(5, 1, 1)
+plt.plot(t * 1000, m_t_basic)
+plt.title(f'Message Signal $m(t)$')
 plt.ylabel('Amplitude (V)')
 plt.grid(True)
 
 # 2. Carrier Signal
-plt.subplot(4, 1, 2)
-plt.plot(t * 1000, c_t, 'r')
-plt.title(f'Carrier Signal $c(t)$ ($A_c=2$V, $f_c=20$kHz)')
+plt.subplot(5, 1, 2)
+plt.plot(t * 1000, c_t)
+plt.title(f'Carrier Signal $c(t)$')
 plt.ylabel('Amplitude (V)')
 plt.grid(True)
 
 # 3. AM Signal
-plt.subplot(4, 1, 3)
-plt.plot(t * 1000, s_t, 'k')
-plt.plot(t * 1000, Ac + m_t_mod, 'g--', linewidth=1, label='Upper Envelope')
+plt.subplot(5, 1, 3)
+plt.plot(t * 1000, s_t)
+plt.plot(t * 1000, Ac + m_t_mod, 'g', linewidth=1, label='Upper Envelope')
 plt.title(f'AM Signal $s(t)$ ($\mu=0.8$)')
 plt.ylabel('Amplitude (V)')
 plt.legend(loc='upper right')
 plt.grid(True)
 
-# 4. Demodulated Signal comparison
-plt.subplot(4, 1, 4)
-plt.plot(t * 1000, m_t_mod, 'b--', label='Original Message (Scaled for $\mu=0.8$)', linewidth=2, alpha=0.5)
-plt.plot(t * 1000, demodulated_scaled, 'r', label='Demodulated Output (Scaled)')
-plt.title('Demodulation Result')
+# 4. Product Signal v(t)
+plt.subplot(5, 1, 4)
+plt.plot(t * 1000, v_t)
+plt.title(f'Product Signal $v(t) = s(t) \cdot c_{{LO}}(t)$')
+plt.ylabel('Amplitude (V)')
+plt.grid(True)
+
+# 5. Demodulated Signal comparison
+plt.subplot(5, 1, 5)
+plt.plot(t * 1000, m_t_mod, 'r--',label='Original Message (Scaled)', linewidth=2, alpha=0.5)
+plt.plot(t * 1000, demodulated_scaled, label='Demodulated Output')
+plt.title('Demodulation Result (2nd Order LPF, $f_c=5$kHz)')
 plt.xlabel('Time (ms)')
 plt.ylabel('Amplitude (V)')
 plt.legend(loc='upper right')
