@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 4 — Sampling &amp; Quantization | Communication Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><a href="../../index.html" class="sidebar-logo">Comm-Sys</a></div>
+  <ul class="sidebar-nav">
+    <li><a href="../01-am-modulation/index.html">1 — AM Modulation</a></li>
+    <li><a href="../02-dsbsc-ssb-vsb/index.html">2 — DSB-SC / SSB / VSB</a></li>
+    <li><a href="../03-angle-modulation/index.html">3 — Angle Modulation</a></li>
+    <li><a href="../04-sampling-quantization/index.html" class="active">4 — Sampling &amp; Quantization</a></li>
+    <li><a href="../05-pulse-modulation/index.html">5 — Pulse Modulation</a></li>
+    <li><a href="../06-pcm/index.html">6 — PCM &amp; TDM</a></li>
+    <li><a href="../07-line-coding/index.html">7 — Line Coding</a></li>
+    <li><a href="../08-isi-pulse-shaping/index.html">8 — ISI &amp; Pulse Shaping</a></li>
+    <li><a href="../09-digital-receivers/index.html">9 — Digital Receivers</a></li>
+  </ul>
+</nav>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+<div class="progress-bar" id="progress-bar"></div>
+
+<main class="main-content">
+  <div class="content-wrapper">
+    <section class="hero">
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <div class="hero-body">
+        <span class="hero-chip">Chapter 4</span>
+        <h1>Sampling &amp; Quantization</h1>
+        <p>The Nyquist-Shannon sampling theorem, aliasing, natural &amp; flat-top sampling, uniform quantization, and signal reconstruction.</p>
+      </div>
+    </section>
+
+    <aside class="toc" id="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#sampling-theorem">Sampling Theorem</a></li>
+        <li><a href="#ideal-sampling">Ideal Sampling</a></li>
+        <li><a href="#natural-sampling">Natural Sampling</a></li>
+        <li><a href="#flat-top-sampling">Flat-Top Sampling</a></li>
+        <li><a href="#aliasing">Aliasing</a></li>
+        <li><a href="#quantization">Quantization</a></li>
+        <li><a href="#sqnr">SQNR</a></li>
+        <li><a href="#reconstruction">Reconstruction</a></li>
+        <li><a href="#sim-sampling">Sim: Sampling</a></li>
+        <li><a href="#sim-quant">Sim: Quantization</a></li>
+        <li><a href="#sim-recon">Sim: Reconstruction</a></li>
+        <li><a href="#quick-ref">Quick Reference</a></li>
+      </ul>
+    </aside>
+
+    <article class="chapter-body">
+      <h2 id="sampling-theorem">The Sampling Theorem</h2>
+      <p>The <strong>Nyquist-Shannon sampling theorem</strong> states that a band-limited signal with maximum frequency $f_m$ can be perfectly reconstructed from its samples if the sampling rate satisfies:</p>
+      <div class="eq-card eq-gold">
+        $$f_s \geq 2f_m$$
+      </div>
+      <p>The minimum sampling rate $f_s = 2f_m$ is called the <strong>Nyquist rate</strong>, and $f_N = f_s/2$ is the <strong>Nyquist frequency</strong> (the maximum frequency that can be represented).</p>
+
+      <h2 id="ideal-sampling">Ideal (Impulse) Sampling</h2>
+      <p>Mathematically, ideal sampling multiplies the signal by a Dirac comb:</p>
+      <div class="eq-card">
+        $$m_s(t) = m(t) \cdot \delta_T(t) = m(t)\sum_{n=-\infty}^{\infty}\delta(t - nT_s)$$
+      </div>
+      <p>In the frequency domain, this produces periodic replicas of $M(f)$:</p>
+      <div class="eq-card eq-highlight">
+        $$M_s(f) = f_s \sum_{n=-\infty}^{\infty} M(f - nf_s)$$
+      </div>
+      <details class="collapsible">
+        <summary>Derivation: Frequency domain sampling</summary>
+        <div class="derivation-steps">
+          <p>The Fourier transform of the Dirac comb is another Dirac comb:</p>
+          $$\mathcal{F}\{\delta_T(t)\} = f_s\sum_{n=-\infty}^{\infty}\delta(f-nf_s)$$
+          <p>Multiplication in time → convolution in frequency:</p>
+          $$M_s(f) = M(f) * f_s\sum_n\delta(f-nf_s) = f_s\sum_n M(f-nf_s)$$
+          <p>If $f_s\ge 2f_m$, the replicas don't overlap and $M(f)$ can be recovered with an ideal LPF of bandwidth $f_s/2$.</p>
+        </div>
+      </details>
+
+      <h2 id="natural-sampling">Natural Sampling</h2>
+      <p>In natural sampling, a periodic pulse train (duty cycle $d = \tau/T_s$) gates the signal. The tops of the pulses follow the signal shape:</p>
+      <div class="eq-card">
+        $$m_{ns}(t) = m(t) \cdot p(t), \quad p(t) = \sum_n \text{rect}\!\left(\frac{t-nT_s}{\tau}\right)$$
+      </div>
+      <p>The spectrum contains weighted replicas: $M_{ns}(f) = \sum_n c_n\,M(f-nf_s)$ where $c_n = d\,\text{sinc}(nd)$.</p>
+
+      <h2 id="flat-top-sampling">Flat-Top Sampling (Sample-and-Hold)</h2>
+      <p>A sample-and-hold circuit holds each sample constant for the pulse duration $\tau$. This is equivalent to ideal sampling followed by convolution with a rectangular pulse:</p>
+      <div class="eq-card">
+        $$m_{ft}(t) = \sum_n m(nT_s)\,\text{rect}\!\left(\frac{t-nT_s}{\tau}\right)$$
+      </div>
+      <p>The spectrum is:</p>
+      <div class="eq-card eq-highlight">
+        $$M_{ft}(f) = \tau\,\text{sinc}(f\tau)\cdot f_s\sum_n M(f-nf_s)$$
+      </div>
+      <p>The $\text{sinc}(f\tau)$ factor causes <strong>aperture distortion</strong>, which can be compensated with an equalizer.</p>
+
+      <h2 id="aliasing">Aliasing</h2>
+      <p>When $f_s < 2f_m$, spectral replicas overlap, causing <strong>aliasing</strong> — irreversible distortion. Aliased frequency components appear as false low-frequency content. Prevention:</p>
+      <ul>
+        <li><strong>Anti-aliasing filter:</strong> Low-pass filter before sampling to limit bandwidth to $f_s/2$.</li>
+        <li><strong>Oversampling:</strong> Use $f_s \gg 2f_m$ to create a guard band.</li>
+      </ul>
+
+      <h2 id="quantization">Uniform Quantization</h2>
+      <p>Quantization maps continuous amplitude values to a finite set of $L = 2^B$ levels, where $B$ is the number of bits:</p>
+      <div class="eq-card">
+        $$\Delta = \frac{x_{max} - x_{min}}{L} = \frac{2V_p}{2^B}$$
+      </div>
+      <p>The <strong>maximum quantization error</strong> is $\pm\Delta/2$. Two types:</p>
+      <ul>
+        <li><strong>Mid-rise:</strong> No level at zero; levels at $\pm\Delta/2, \pm 3\Delta/2, \ldots$</li>
+        <li><strong>Mid-tread:</strong> A level at zero; levels at $0, \pm\Delta, \pm 2\Delta, \ldots$</li>
+      </ul>
+
+      <h2 id="sqnr">Signal-to-Quantization-Noise Ratio (SQNR)</h2>
+      <p>For a full-scale sinusoidal input with uniform quantization:</p>
+      <div class="eq-card eq-gold">
+        $$\text{SQNR (dB)} = 6.02B + 1.76$$
+      </div>
+      <details class="collapsible">
+        <summary>Derivation: SQNR formula</summary>
+        <div class="derivation-steps">
+          <p>Quantization error $e$ is uniformly distributed in $[-\Delta/2, +\Delta/2]$. Noise power:</p>
+          $$\sigma_e^2 = \frac{\Delta^2}{12}$$
+          <p>For a sinusoid of peak amplitude $V_p = L\Delta/2$, signal power = $V_p^2/2 = L^2\Delta^2/8$:</p>
+          $$\text{SQNR} = \frac{L^2\Delta^2/8}{\Delta^2/12} = \frac{3L^2}{2} = \frac{3\cdot 2^{2B}}{2}$$
+          $$\text{SQNR (dB)} = 10\log_{10}\!\left(\frac{3}{2}\cdot 2^{2B}\right) = 10\log_{10}\frac{3}{2} + 20B\log_{10}2 = 1.76 + 6.02B$$
+        </div>
+      </details>
+      <p>Each additional bit improves SQNR by approximately <strong>6 dB</strong>.</p>
+
+      <h2 id="reconstruction">Signal Reconstruction</h2>
+      <p>Perfect reconstruction uses the ideal interpolation formula (Whittaker-Shannon):</p>
+      <div class="eq-card eq-highlight">
+        $$m(t) = \sum_{n=-\infty}^{\infty} m(nT_s)\,\text{sinc}\!\left(\frac{t - nT_s}{T_s}\right)$$
+      </div>
+      <p>Practical reconstruction methods:</p>
+      <ul>
+        <li><strong>Zero-Order Hold (ZOH):</strong> Hold each sample constant — simple but introduces sinc distortion.</li>
+        <li><strong>First-Order Hold (FOH):</strong> Linear interpolation between samples — better approximation.</li>
+        <li><strong>Ideal LPF:</strong> Perfect reconstruction using sinc interpolation (non-causal, impractical).</li>
+      </ul>
+
+      <!-- ━━━ Simulations ━━━ -->
+      <h2 id="sim-sampling">Simulation — Sampling</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>f<sub>s</sub>:
+            <input type="range" id="sampling-fs" min="0.5" max="20" step="0.5" value="8">
+            <span id="sampling-fs-val">8</span> Hz
+          </label>
+          <label>f<sub>m</sub>:
+            <input type="range" id="sampling-fm" min="0.5" max="5" step="0.1" value="1">
+            <span id="sampling-fm-val">1</span> Hz
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="sampling-mode" value="ideal" checked> Ideal</label>
+            <label><input type="radio" name="sampling-mode" value="natural"> Natural</label>
+            <label><input type="radio" name="sampling-mode" value="flat-top"> Flat-Top</label>
+          </div>
+          <button id="sampling-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="sampling-canvas"></canvas>
+        <div class="sim-readouts">
+          <span>f<sub>s</sub>/f<sub>m</sub> = <strong id="sampling-ratio">—</strong></span>
+          <span>Nyquist: <strong id="sampling-nyquist">—</strong></span>
+        </div>
+      </div>
+
+      <h2 id="sim-quant">Simulation — Quantization</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Bits:
+            <input type="range" id="quant-bits" min="1" max="8" step="1" value="3">
+            <span id="quant-bits-val">3</span>
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="quant-type" value="midrise" checked> Mid-Rise</label>
+            <label><input type="radio" name="quant-type" value="midtread"> Mid-Tread</label>
+          </div>
+          <button id="quant-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="quantization-canvas"></canvas>
+        <div class="sim-readouts">
+          <span>Levels: <strong id="quant-levels">—</strong></span>
+          <span>Step Δ: <strong id="quant-step">—</strong></span>
+          <span>SQNR (measured): <strong id="quant-sqnr-meas">—</strong></span>
+          <span>SQNR (theory): <strong id="quant-sqnr-theory">—</strong></span>
+        </div>
+      </div>
+
+      <h2 id="sim-recon">Simulation — Reconstruction</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>f<sub>s</sub>:
+            <input type="range" id="recon-fs" min="1" max="20" step="0.5" value="8">
+            <span id="recon-fs-val">8</span> Hz
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="recon-filter" value="ideal" checked> Ideal (sinc)</label>
+            <label><input type="radio" name="recon-filter" value="zoh"> ZOH</label>
+            <label><input type="radio" name="recon-filter" value="foh"> FOH</label>
+          </div>
+          <button id="recon-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="reconstruction-canvas"></canvas>
+        <div class="chart-container" style="height:180px">
+          <canvas id="recon-spectrum-chart"></canvas>
+        </div>
+        <div class="sim-readouts">
+          <span>MSE: <strong id="recon-error">—</strong></span>
+        </div>
+      </div>
+
+      <h2 id="quick-ref">Quick Reference</h2>
+      <table class="ref-table">
+        <thead><tr><th>Quantity</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><td>Nyquist rate</td><td>$f_s \geq 2f_m$</td></tr>
+          <tr><td>Ideal sampled spectrum</td><td>$f_s\sum_n M(f-nf_s)$</td></tr>
+          <tr><td>Flat-top spectrum</td><td>$\tau\,\text{sinc}(f\tau)\cdot f_s\sum_n M(f-nf_s)$</td></tr>
+          <tr><td>Quantization levels</td><td>$L = 2^B$</td></tr>
+          <tr><td>Step size</td><td>$\Delta = 2V_p / 2^B$</td></tr>
+          <tr><td>Quantization noise power</td><td>$\Delta^2/12$</td></tr>
+          <tr><td>SQNR (sinusoidal)</td><td>$6.02B + 1.76$ dB</td></tr>
+          <tr><td>Reconstruction (sinc)</td><td>$\sum_n m(nT_s)\,\text{sinc}((t-nT_s)/T_s)$</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/sampling.js"></script>
+<script src="sim/quantization.js"></script>
+<script src="sim/reconstruction.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});});
+</script>
+<script>
+(function(){const c=document.getElementById('hero-canvas');if(!c)return;const ctx=c.getContext('2d');let W,H,t=0;
+function resize(){const r=c.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;c.width=W*d;c.height=H*d;c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);}
+resize();window.addEventListener('resize',resize);
+function draw(){t+=0.03;ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#38bdf8';ctx.lineWidth=1.5;ctx.globalAlpha=0.3;ctx.beginPath();
+  for(let x=0;x<W;x++){const y=H/2+30*Math.sin(0.04*x+t);if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
+  ctx.fillStyle='#fbbf24';ctx.globalAlpha=0.7;
+  for(let i=0;i<W;i+=W/12){const y=H/2+30*Math.sin(0.04*i+t);ctx.beginPath();ctx.arc(i,y,3,0,2*Math.PI);ctx.fill();}
+  ctx.globalAlpha=1;requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
+</script>
+</body>
+</html>

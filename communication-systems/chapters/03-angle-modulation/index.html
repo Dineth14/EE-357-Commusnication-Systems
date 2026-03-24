@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 3 — Angle Modulation | Communication Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+<!-- ─── Sidebar ─── -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><a href="../../index.html" class="sidebar-logo">Comm-Sys</a></div>
+  <ul class="sidebar-nav">
+    <li><a href="../01-am-modulation/index.html">1 — AM Modulation</a></li>
+    <li><a href="../02-dsbsc-ssb-vsb/index.html">2 — DSB-SC / SSB / VSB</a></li>
+    <li><a href="../03-angle-modulation/index.html" class="active">3 — Angle Modulation</a></li>
+    <li><a href="../04-sampling-quantization/index.html">4 — Sampling &amp; Quantization</a></li>
+    <li><a href="../05-pulse-modulation/index.html">5 — Pulse Modulation</a></li>
+    <li><a href="../06-pcm/index.html">6 — PCM &amp; TDM</a></li>
+    <li><a href="../07-line-coding/index.html">7 — Line Coding</a></li>
+    <li><a href="../08-isi-pulse-shaping/index.html">8 — ISI &amp; Pulse Shaping</a></li>
+    <li><a href="../09-digital-receivers/index.html">9 — Digital Receivers</a></li>
+  </ul>
+</nav>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ─── Progress bar ─── -->
+<div class="progress-bar" id="progress-bar"></div>
+
+<!-- ─── Main ─── -->
+<main class="main-content">
+  <div class="content-wrapper">
+
+    <!-- Hero -->
+    <section class="hero">
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <div class="hero-body">
+        <span class="hero-chip">Chapter 3</span>
+        <h1>Angle Modulation</h1>
+        <p>Phase and Frequency Modulation — from narrow-band to wide-band, Bessel functions, Carson's rule, and demodulation.</p>
+      </div>
+    </section>
+
+    <!-- Right-side TOC -->
+    <aside class="toc" id="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#pm-derivation">PM Derivation</a></li>
+        <li><a href="#fm-derivation">FM Derivation</a></li>
+        <li><a href="#bessel-expansion">Bessel Expansion</a></li>
+        <li><a href="#carsons-rule">Carson's Rule</a></li>
+        <li><a href="#nbfm-vs-wbfm">NBFM vs WBFM</a></li>
+        <li><a href="#fm-generation">FM Generation</a></li>
+        <li><a href="#fm-demodulation">FM Demodulation</a></li>
+        <li><a href="#snr-analysis">SNR Analysis</a></li>
+        <li><a href="#sim-pm">Sim: PM Waveform</a></li>
+        <li><a href="#sim-fm">Sim: FM Waveform</a></li>
+        <li><a href="#sim-spectrum">Sim: FM Spectrum</a></li>
+        <li><a href="#sim-demod">Sim: FM Demod</a></li>
+        <li><a href="#quick-ref">Quick Reference</a></li>
+      </ul>
+    </aside>
+
+    <!-- ━━━ Theory ━━━ -->
+    <article class="chapter-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>In <strong>angle modulation</strong>, information is carried in the <em>angle</em> (instantaneous phase or frequency) of the carrier, while the envelope remains constant. This provides improved noise immunity at the expense of bandwidth — a powerful trade-off exploited by FM radio, telemetry, and many digital systems.</p>
+      <p>The general angle-modulated signal is:</p>
+      <div class="eq-card">
+        $$s(t)=A_c\cos[\theta_i(t)]$$
+      </div>
+      <p>where $\theta_i(t)$ is the instantaneous angle. The <strong>instantaneous frequency</strong> is:</p>
+      <div class="eq-card eq-highlight">
+        $$f_i(t)=\frac{1}{2\pi}\frac{d\theta_i(t)}{dt}$$
+      </div>
+
+      <!-- PM -->
+      <h2 id="pm-derivation">Phase Modulation (PM)</h2>
+      <p>In PM, the instantaneous phase is directly proportional to the message signal:</p>
+      <div class="eq-card">
+        $$\theta_i(t)=2\pi f_c t + k_p\,m(t)$$
+      </div>
+      <p>where $k_p$ is the <strong>phase sensitivity</strong> in radians per volt. Thus:</p>
+      <div class="eq-card eq-highlight">
+        $$s_{PM}(t)=A_c\cos\!\bigl[2\pi f_c t + k_p\,m(t)\bigr]$$
+      </div>
+      <p>The <strong>maximum phase deviation</strong> is $\Delta\phi=k_p\max|m(t)|$. For a single-tone message $m(t)=A_m\cos(2\pi f_m t)$, the peak deviation is $\Delta\phi=k_p A_m$.</p>
+      <details class="collapsible">
+        <summary>Derivation: PM instantaneous frequency</summary>
+        <div class="derivation-steps">
+          <p>Starting from $\theta_i(t)=2\pi f_c t + k_p A_m\cos(2\pi f_m t)$:</p>
+          $$f_i(t)=\frac{1}{2\pi}\frac{d\theta_i}{dt}=f_c - \frac{k_p A_m f_m}{1}\sin(2\pi f_m t)$$
+          <p>Maximum frequency deviation: $\Delta f = k_p A_m f_m$. Notice that in PM, frequency deviation depends on <em>both</em> the amplitude <em>and</em> frequency of the message.</p>
+        </div>
+      </details>
+
+      <!-- FM -->
+      <h2 id="fm-derivation">Frequency Modulation (FM)</h2>
+      <p>In FM, the instantaneous frequency is directly proportional to the message:</p>
+      <div class="eq-card">
+        $$f_i(t)=f_c + k_f\,m(t)$$
+      </div>
+      <p>where $k_f$ is the <strong>frequency sensitivity</strong> in Hz/V. The instantaneous phase is obtained by integration:</p>
+      <div class="eq-card eq-highlight">
+        $$\theta_i(t)=2\pi f_c t + 2\pi k_f\int_{0}^{t}m(\tau)\,d\tau$$
+      </div>
+      <p>The FM signal is therefore:</p>
+      <div class="eq-card eq-gold">
+        $$s_{FM}(t)=A_c\cos\!\left[2\pi f_c t + 2\pi k_f\int_{0}^{t}m(\tau)\,d\tau\right]$$
+      </div>
+      <p>For a single-tone message $m(t)=A_m\cos(2\pi f_m t)$:</p>
+      <div class="eq-card">
+        $$s_{FM}(t)=A_c\cos\!\bigl[2\pi f_c t + \beta\sin(2\pi f_m t)\bigr]$$
+      </div>
+      <p>where the <strong>modulation index</strong> is:</p>
+      <div class="eq-card eq-highlight">
+        $$\beta=\frac{\Delta f}{f_m}=\frac{k_f A_m}{f_m}$$
+      </div>
+      <details class="collapsible">
+        <summary>Key difference: PM vs FM</summary>
+        <div class="derivation-steps">
+          <table class="ref-table">
+            <thead><tr><th>Property</th><th>PM</th><th>FM</th></tr></thead>
+            <tbody>
+              <tr><td>Phase deviation</td><td>$k_p A_m$ (independent of $f_m$)</td><td>$k_f A_m / f_m$ (inversely proportional to $f_m$)</td></tr>
+              <tr><td>Freq. deviation $\Delta f$</td><td>$k_p A_m f_m$ (depends on $f_m$)</td><td>$k_f A_m$ (independent of $f_m$)</td></tr>
+              <tr><td>Relation</td><td colspan="2">FM = PM with integrated message; PM = FM with differentiated message</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- Bessel expansion -->
+      <h2 id="bessel-expansion">Bessel Function Expansion</h2>
+      <p>Using the <strong>Jacobi-Anger identity</strong>, the single-tone FM signal expands as:</p>
+      <div class="eq-card eq-gold">
+        $$s_{FM}(t)=A_c\sum_{n=-\infty}^{\infty}J_n(\beta)\cos\!\bigl[2\pi(f_c+n f_m)t\bigr]$$
+      </div>
+      <p>where $J_n(\beta)$ is the Bessel function of the first kind, order $n$. Key properties:</p>
+      <ul>
+        <li>$J_{-n}(\beta)=(-1)^n J_n(\beta)$</li>
+        <li>$\displaystyle\sum_{n=-\infty}^{\infty}J_n^2(\beta)=1$ (constant power, since envelope is constant)</li>
+        <li>For $\beta\ll 1$: $J_0(\beta)\approx 1$, $J_1(\beta)\approx\beta/2$, $J_n(\beta)\approx 0$ for $|n|\ge 2$ → <strong>NBFM</strong></li>
+      </ul>
+      <details class="collapsible">
+        <summary>Derivation: Jacobi-Anger identity</summary>
+        <div class="derivation-steps">
+          <p>We start with the complex exponential form:</p>
+          $$e^{j\beta\sin\theta}=\sum_{n=-\infty}^{\infty}J_n(\beta)\,e^{jn\theta}$$
+          <p>Using Euler's formula for the FM signal:</p>
+          $$s(t)=\text{Re}\{A_c\,e^{j(2\pi f_c t+\beta\sin 2\pi f_m t)}\}=\text{Re}\left\{A_c\,e^{j2\pi f_c t}\sum_n J_n(\beta)\,e^{jn2\pi f_m t}\right\}$$
+          <p>Taking the real part yields the cosine expansion above.</p>
+        </div>
+      </details>
+
+      <!-- Carson's Rule -->
+      <h2 id="carsons-rule">Carson's Rule</h2>
+      <p>Although FM is theoretically infinite in bandwidth, Carson's rule gives a practical estimate encompassing ~98% of the signal power:</p>
+      <div class="eq-card eq-gold">
+        $$B_T\approx 2(\Delta f + f_m)=2f_m(\beta + 1)$$
+      </div>
+      <p>For <strong>NBFM</strong> ($\beta\ll 1$): $B_T\approx 2f_m$ (same as AM). For <strong>WBFM</strong> ($\beta\gg 1$): $B_T\approx 2\Delta f$.</p>
+
+      <!-- NBFM vs WBFM -->
+      <h2 id="nbfm-vs-wbfm">NBFM vs WBFM</h2>
+      <table class="ref-table">
+        <thead><tr><th>Property</th><th>NBFM ($\beta\ll 1$)</th><th>WBFM ($\beta\gg 1$)</th></tr></thead>
+        <tbody>
+          <tr><td>Bandwidth</td><td>$\approx 2f_m$</td><td>$\approx 2\Delta f$</td></tr>
+          <tr><td>Spectrum</td><td>Carrier + one sideband pair</td><td>Multiple significant sidebands</td></tr>
+          <tr><td>SNR improvement</td><td>None ($\approx$ AM)</td><td>$3\beta^2(\beta+1)$ over AM</td></tr>
+          <tr><td>Waveform</td><td>Nearly sinusoidal</td><td>Complex, rapidly varying phase</td></tr>
+          <tr><td>Generation</td><td>Direct (VCO or reactance)</td><td>Indirect (Armstrong) or direct VCO</td></tr>
+        </tbody>
+      </table>
+
+      <!-- FM Generation -->
+      <h2 id="fm-generation">FM Generation Methods</h2>
+      <h3>Direct Method — VCO</h3>
+      <p>A <strong>Voltage-Controlled Oscillator</strong> produces a frequency proportional to the input voltage. Simple but may suffer from carrier frequency drift.</p>
+      <h3>Indirect Method — Armstrong</h3>
+      <p>Armstrong's method generates NBFM first, then uses frequency multiplication to widen $\beta$ while keeping the carrier stable with a crystal oscillator:</p>
+      <ol>
+        <li>Generate NBFM at low carrier frequency $f_1$ with small $\beta_1$</li>
+        <li>Apply frequency multiplier ($\times n$): new $\beta=n\beta_1$, new $f_c=n f_1$</li>
+        <li>Use mixer + another multiplier to reach desired $f_c$ and $\beta$</li>
+      </ol>
+      <div class="eq-card">
+        $$\text{After }n\text{-fold multiplication: }\;\beta_{out}=n\,\beta_{in},\quad f_{c,out}=n\,f_{c,in}$$
+      </div>
+
+      <!-- FM Demodulation -->
+      <h2 id="fm-demodulation">FM Demodulation</h2>
+      <h3>Frequency Discriminator</h3>
+      <p>Converts frequency variations to amplitude variations using a circuit whose output is proportional to the input frequency deviation. Consists of a differentiator followed by an envelope detector:</p>
+      <div class="eq-card">
+        $$v_o(t)\propto \frac{d}{dt}\bigl[\theta_i(t)\bigr]\propto f_i(t)-f_c \propto m(t)$$
+      </div>
+      <h3>Phase-Locked Loop (PLL)</h3>
+      <p>Tracks the instantaneous phase of the FM signal. The VCO control voltage is proportional to $m(t)$:</p>
+      <ol>
+        <li>Phase detector compares input FM signal with VCO output</li>
+        <li>Loop filter smooths the error signal</li>
+        <li>VCO frequency tracks $f_i(t)$; its control voltage $\propto m(t)$</li>
+      </ol>
+      <h3>Ratio Detector &amp; Foster-Seeley</h3>
+      <p>Balanced discriminator circuits using tuned transformers — historically used in analog FM receivers. The ratio detector provides inherent amplitude limiting.</p>
+
+      <!-- SNR Analysis -->
+      <h2 id="snr-analysis">SNR Analysis</h2>
+      <p>For FM with single-tone modulation and additive white Gaussian noise:</p>
+      <div class="eq-card eq-highlight">
+        $$\text{SNR}_o=3\beta^2(\beta+1)\cdot\text{SNR}_{baseband}$$
+      </div>
+      <p>This is the <strong>wideband FM advantage</strong> — trading bandwidth for improved SNR. The improvement of $3\beta^2(\beta+1)$ over baseband is massive for large $\beta$.</p>
+      <details class="collapsible">
+        <summary>Derivation: FM output SNR</summary>
+        <div class="derivation-steps">
+          <p>For FM with a single-tone message of bandwidth $W=f_m$:</p>
+          $$\text{SNR}_o=\frac{3A_c^2 k_f^2 A_m^2}{8\pi^2 N_0 W^3}=\frac{3\beta^2(\beta+1)}{1}\cdot\frac{A_c^2}{2N_0 B_T}\cdot\frac{B_T}{W}$$
+          <p>Compared to baseband SNR ($= A_c^2/(2N_0 W)$), the FM gain is $3\beta^2(\beta+1)$.</p>
+          <p><strong>Pre-emphasis / De-emphasis:</strong> Using a pre-emphasis filter ($H(f)\propto f$) at the transmitter and a complementary de-emphasis filter at the receiver provides an additional gain of $(f_m/f_1)^2/3$ for triangular noise spectrum suppression.</p>
+          <p><strong>Threshold effect:</strong> Below a certain input SNR ($\approx 10$ dB), FM performance degrades rapidly due to spike noise (clicks).</p>
+        </div>
+      </details>
+
+      <div class="eq-card eq-rose">
+        <strong>FM Threshold:</strong> When $\text{SNR}_{in}$ falls below approximately 10 dB, the demodulator performance degrades severely due to impulse noise events (clicks). PLL demodulators have lower threshold (~3 dB below discriminator).
+      </div>
+
+      <!-- ━━━ Simulations ━━━ -->
+      <h2 id="sim-pm">Simulation — PM Waveform</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>k<sub>p</sub>:
+            <input type="range" id="pm-kp-slider" min="0.1" max="5" step="0.1" value="2">
+            <span id="pm-kp-val">2</span> rad/V
+          </label>
+          <label>f<sub>m</sub>:
+            <input type="range" id="pm-fm-slider" min="0.1" max="5" step="0.1" value="1">
+            <span id="pm-fm-val">1</span> Hz
+          </label>
+          <label>f<sub>c</sub>:
+            <input type="range" id="pm-fc-slider" min="2" max="20" step="1" value="8">
+            <span id="pm-fc-val">8</span> Hz
+          </label>
+          <label>Speed:
+            <input type="range" id="pm-speed-slider" min="0.25" max="4" step="0.25" value="1">
+            <span id="pm-speed-val">1</span>×
+          </label>
+          <button id="pm-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="pm-canvas"></canvas>
+        <div class="sim-readouts">
+          <span>Δφ = <strong id="pm-dphi">—</strong> rad</span>
+        </div>
+      </div>
+
+      <h2 id="sim-fm">Simulation — FM Waveform</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>k<sub>f</sub>:
+            <input type="range" id="fm-kf-slider" min="0.5" max="20" step="0.5" value="5">
+            <span id="fm-kf-val">5</span> Hz/V
+          </label>
+          <label>f<sub>m</sub>:
+            <input type="range" id="fm-fm-slider" min="0.1" max="5" step="0.1" value="1">
+            <span id="fm-fm-val">1</span> Hz
+          </label>
+          <label>f<sub>c</sub>:
+            <input type="range" id="fm-fc-slider" min="2" max="20" step="1" value="8">
+            <span id="fm-fc-val">8</span> Hz
+          </label>
+          <label>Speed:
+            <input type="range" id="fm-speed-slider" min="0.25" max="4" step="0.25" value="1">
+            <span id="fm-speed-val">1</span>×
+          </label>
+          <button id="fm-play-btn" class="sim-btn">⏸ Pause</button>
+          <button id="fm-reset-btn" class="sim-btn">↺ Reset</button>
+        </div>
+        <canvas id="fm-canvas"></canvas>
+        <div class="sim-readouts">
+          <span>Δf = <strong id="fm-df">—</strong> Hz</span>
+          <span>β = <strong id="fm-beta">—</strong></span>
+          <span>B<sub>T</sub> = <strong id="fm-bt">—</strong> Hz</span>
+        </div>
+      </div>
+
+      <h2 id="sim-spectrum">Simulation — FM Spectrum (Bessel)</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>β:
+            <input type="range" id="bessel-beta-slider" min="0.01" max="10" step="0.01" value="2.5">
+            <span id="bessel-beta-val">2.5</span>
+          </label>
+        </div>
+        <div class="chart-container">
+          <canvas id="fm-spectrum-chart"></canvas>
+        </div>
+        <div class="sim-readouts">
+          <span>Carson's BW = <strong id="bessel-bw">—</strong> harmonics</span>
+        </div>
+      </div>
+
+      <h2 id="sim-demod">Simulation — FM Demodulation</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Noise σ:
+            <input type="range" id="fm-demod-noise" min="0" max="5" step="0.1" value="0">
+            <span id="fm-demod-noise-val">0</span>
+          </label>
+          <button id="fm-demod-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="fm-demod-canvas"></canvas>
+      </div>
+
+      <!-- Quick Reference -->
+      <h2 id="quick-ref">Quick Reference</h2>
+      <table class="ref-table">
+        <thead><tr><th>Quantity</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><td>PM signal</td><td>$A_c\cos[2\pi f_c t + k_p m(t)]$</td></tr>
+          <tr><td>FM signal</td><td>$A_c\cos\!\left[2\pi f_c t + 2\pi k_f\int_0^t m(\tau)d\tau\right]$</td></tr>
+          <tr><td>Modulation index β</td><td>$\Delta f / f_m = k_f A_m / f_m$</td></tr>
+          <tr><td>Frequency deviation</td><td>$\Delta f = k_f \max|m(t)|$</td></tr>
+          <tr><td>Carson's rule</td><td>$B_T = 2(\Delta f + f_m) = 2f_m(\beta+1)$</td></tr>
+          <tr><td>Bessel expansion</td><td>$A_c\sum_n J_n(\beta)\cos[2\pi(f_c+nf_m)t]$</td></tr>
+          <tr><td>Constant power</td><td>$\sum_n J_n^2(\beta) = 1$</td></tr>
+          <tr><td>FM SNR gain</td><td>$3\beta^2(\beta+1)$</td></tr>
+          <tr><td>NBFM bandwidth</td><td>$\approx 2f_m$</td></tr>
+          <tr><td>WBFM bandwidth</td><td>$\approx 2\Delta f$</td></tr>
+          <tr><td>Armstrong multiplier</td><td>$\beta_{out}=n\beta_{in}$, $f_{c,out}=nf_{c,in}$</td></tr>
+        </tbody>
+      </table>
+
+    </article>
+  </div>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/pm-waveform.js"></script>
+<script src="sim/fm-waveform.js"></script>
+<script src="sim/fm-spectrum.js"></script>
+<script src="sim/fm-demod.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],
+    throwOnError:false
+  });
+});
+</script>
+<!-- Hero canvas animation -->
+<script>
+(function(){
+  const c=document.getElementById('hero-canvas');if(!c)return;
+  const ctx=c.getContext('2d');let W,H,t=0;
+  function resize(){const r=c.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;c.width=W*d;c.height=H*d;c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);}
+  resize();window.addEventListener('resize',resize);
+  function draw(){t+=0.02;ctx.clearRect(0,0,W,H);
+    const colors=['#38bdf8','#2dd4bf','#fbbf24'];
+    for(let w=0;w<3;w++){ctx.strokeStyle=colors[w];ctx.lineWidth=2;ctx.globalAlpha=0.5;ctx.beginPath();
+      for(let x=0;x<W;x++){const phase=t*(1+w*0.3);const freq=0.02+w*0.01;const amp=20+w*10;
+        const base=H/2+w*25-25;
+        const y=base+amp*Math.sin(freq*x+phase)*Math.cos(freq*x*0.5+phase*0.3);
+        if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+      ctx.stroke();}
+    ctx.globalAlpha=1;requestAnimationFrame(draw);}
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
