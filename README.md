@@ -69,6 +69,10 @@ Contains solutions and simulations for laboratory assignments.
 - **[Tutorial1_LineCodes.py](Tutorials/Tutorial1_LineCodes.py)**: Simulation of NRZ, RZ, and Manchester codes.
 
 - Check [Output_Plots/README.md](Output_Plots/README.md) for details on the visualization results.
+### 6.communication-systems
+Contains the main HTML file and assets for the Communication Systems course website.
+\- **[index.html](communication-systems/index.html)**: Main landing page with chapter grid and links to simulations.
+\- **/assets**: Contains CSS, JavaScript, and image files for the website.
 
 ### Usage
 
