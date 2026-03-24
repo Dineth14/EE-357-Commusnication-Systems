@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 6 — PCM &amp; TDM | Communication Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><a href="../../index.html" class="sidebar-logo">Comm-Sys</a></div>
+  <ul class="sidebar-nav">
+    <li><a href="../01-am-modulation/index.html">1 — AM Modulation</a></li>
+    <li><a href="../02-dsbsc-ssb-vsb/index.html">2 — DSB-SC / SSB / VSB</a></li>
+    <li><a href="../03-angle-modulation/index.html">3 — Angle Modulation</a></li>
+    <li><a href="../04-sampling-quantization/index.html">4 — Sampling &amp; Quantization</a></li>
+    <li><a href="../05-pulse-modulation/index.html">5 — Pulse Modulation</a></li>
+    <li><a href="../06-pcm/index.html" class="active">6 — PCM &amp; TDM</a></li>
+    <li><a href="../07-line-coding/index.html">7 — Line Coding</a></li>
+    <li><a href="../08-isi-pulse-shaping/index.html">8 — ISI &amp; Pulse Shaping</a></li>
+    <li><a href="../09-digital-receivers/index.html">9 — Digital Receivers</a></li>
+  </ul>
+</nav>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+<div class="progress-bar" id="progress-bar"></div>
+
+<main class="main-content">
+  <div class="content-wrapper">
+    <section class="hero">
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <div class="hero-body">
+        <span class="hero-chip">Chapter 6</span>
+        <h1>PCM &amp; TDM</h1>
+        <p>Pulse Code Modulation, companding (μ-law &amp; A-law), differential PCM, delta modulation, and time-division multiplexing.</p>
+      </div>
+    </section>
+
+    <aside class="toc" id="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#pcm-overview">PCM Overview</a></li>
+        <li><a href="#pcm-encoding">Encoding Process</a></li>
+        <li><a href="#companding">Companding</a></li>
+        <li><a href="#dpcm">DPCM</a></li>
+        <li><a href="#delta-mod">Delta Modulation</a></li>
+        <li><a href="#tdm">TDM</a></li>
+        <li><a href="#sim-encode">Sim: PCM Encoder</a></li>
+        <li><a href="#sim-companding">Sim: Companding</a></li>
+        <li><a href="#sim-snr">Sim: PCM SNR</a></li>
+        <li><a href="#quick-ref">Quick Reference</a></li>
+      </ul>
+    </aside>
+
+    <article class="chapter-body">
+      <h2 id="pcm-overview">PCM Overview</h2>
+      <p><strong>Pulse Code Modulation (PCM)</strong> is the standard method for digital representation of analog signals. The process involves three steps: <em>sampling</em>, <em>quantization</em>, and <em>encoding</em>.</p>
+      <div class="eq-card eq-highlight">
+        $$\text{Bit rate} = f_s \times B \text{ bits/second}$$
+      </div>
+      <p>where $f_s$ is the sampling rate and $B$ is bits per sample. For telephone-quality audio: $f_s = 8000$ Hz, $B = 8$ → 64 kbps (DS-0 channel).</p>
+
+      <h2 id="pcm-encoding">Encoding Process</h2>
+      <ol>
+        <li><strong>Sampling:</strong> Convert continuous signal to discrete samples at rate $f_s \geq 2f_m$</li>
+        <li><strong>Quantization:</strong> Map each sample to nearest of $L = 2^B$ levels</li>
+        <li><strong>Encoding:</strong> Represent each quantized level as a $B$-bit binary codeword</li>
+      </ol>
+      <div class="eq-card">
+        $$\text{Minimum bandwidth}=\frac{R_b}{2}=\frac{f_s \cdot B}{2} \text{ Hz (Nyquist BW)}$$
+      </div>
+
+      <h2 id="companding">Companding</h2>
+      <p>Uniform quantization gives poor SQNR for small signals. <strong>Companding</strong> (compress + expand) applies a non-linear compression before quantization and the inverse expansion after decoding.</p>
+
+      <h3>μ-Law (North America, Japan)</h3>
+      <div class="eq-card eq-gold">
+        $$y = F_\mu(x) = \text{sgn}(x)\frac{\ln(1 + \mu|x|)}{\ln(1 + \mu)}, \quad \mu = 255$$
+      </div>
+
+      <h3>A-Law (Europe, International)</h3>
+      <div class="eq-card eq-gold">
+        $$y = F_A(x) = \text{sgn}(x)\begin{cases}\frac{A|x|}{1+\ln A} & |x|<\frac{1}{A}\\ \frac{1+\ln(A|x|)}{1+\ln A} & \frac{1}{A}\leq|x|\leq 1\end{cases}, \quad A=87.6$$
+      </div>
+      <details class="collapsible">
+        <summary>Companding SNR improvement</summary>
+        <div class="derivation-steps">
+          <p>With companding, the SQNR becomes approximately independent of signal level for large $\mu$ or $A$:</p>
+          $$\text{SQNR}_{\mu\text{-law}} \approx \frac{3L^2}{[\ln(1+\mu)]^2}$$
+          <p>Compared to uniform: $\text{SQNR}_{uniform} = \frac{3L^2}{2}$ at full scale, but degrades as $\propto x^2$ for small signals. Companding equalizes SQNR across all signal levels.</p>
+        </div>
+      </details>
+
+      <h2 id="dpcm">Differential PCM (DPCM)</h2>
+      <p>DPCM encodes the <em>difference</em> between successive samples rather than absolute values:</p>
+      <div class="eq-card">
+        $$e(n) = m(n) - \hat{m}(n)$$
+      </div>
+      <p>where $\hat{m}(n)$ is 	a prediction based on past samples. Since differences are typically smaller, fewer bits are needed → lower bit rate. A simple first-order predictor: $\hat{m}(n) = m(n-1)$.</p>
+
+      <h2 id="delta-mod">Delta Modulation (DM)</h2>
+      <p>DM is a 1-bit DPCM: each sample is encoded as a single bit indicating whether the signal increased or decreased:</p>
+      <div class="eq-card">
+        $$\hat{m}(n) = \hat{m}(n-1) + \delta \cdot \text{sgn}[m(n) - \hat{m}(n-1)]$$
+      </div>
+      <p>where $\delta$ is the step size. Two types of distortion:</p>
+      <ul>
+        <li><strong>Slope overload:</strong> Signal changes faster than $\delta \cdot f_s$ → requires $\delta > \frac{2\pi f_m A_m}{f_s}$</li>
+        <li><strong>Granular noise:</strong> Signal is nearly flat but staircase oscillates by $\pm\delta$</li>
+      </ul>
+      <p><strong>Adaptive DM (ADM)</strong> varies $\delta$ dynamically to balance both distortion types.</p>
+
+      <h2 id="tdm">Time-Division Multiplexing (TDM)</h2>
+      <p>TDM interleaves samples from multiple channels into a single bitstream:</p>
+      <div class="eq-card eq-highlight">
+        $$R_{total} = N \times f_s \times B \text{ bps}$$
+      </div>
+      <p>where $N$ is the number of channels. T1 System: 24 channels × 8 kHz × 8 bits + 1 framing bit = <strong>1.544 Mbps</strong>. E1: 32 channels × 8 kHz × 8 bits = <strong>2.048 Mbps</strong>.</p>
+
+      <!-- ━━━ Simulations ━━━ -->
+      <h2 id="sim-encode">Simulation — PCM Encoder</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Bits:
+            <input type="range" id="pcm-bits" min="2" max="8" step="1" value="4">
+            <span id="pcm-bits-val">4</span>
+          </label>
+          <label>f<sub>s</sub>:
+            <input type="range" id="pcm-fs" min="4" max="20" step="1" value="10">
+            <span id="pcm-fs-val">10</span> Hz
+          </label>
+          <button id="pcm-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="pcm-encode-canvas"></canvas>
+        <div class="sim-readouts">
+          <span>Bit rate: <strong id="pcm-bitrate">—</strong></span>
+          <span>Min BW: <strong id="pcm-bw">—</strong></span>
+        </div>
+      </div>
+
+      <h2 id="sim-companding">Simulation — Companding Curves</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>μ:
+            <input type="range" id="comp-mu" min="1" max="500" step="1" value="255">
+            <span id="comp-mu-val">255</span>
+          </label>
+          <label>A:
+            <input type="range" id="comp-A" min="1" max="200" step="0.1" value="87.6">
+            <span id="comp-A-val">87.6</span>
+          </label>
+        </div>
+        <div class="chart-container">
+          <canvas id="companding-chart"></canvas>
+        </div>
+      </div>
+
+      <h2 id="sim-snr">Simulation — PCM SQNR</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Highlight bits:
+            <input type="range" id="pcm-snr-bits" min="1" max="16" step="1" value="8">
+            <span id="pcm-snr-bits-val">8</span>
+          </label>
+        </div>
+        <div class="chart-container">
+          <canvas id="pcm-snr-chart"></canvas>
+        </div>
+        <div class="sim-readouts">
+          <span>SQNR: <strong id="pcm-snr-readout">49.9 dB</strong></span>
+        </div>
+      </div>
+
+      <h2 id="quick-ref">Quick Reference</h2>
+      <table class="ref-table">
+        <thead><tr><th>Quantity</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><td>PCM bit rate</td><td>$R_b = f_s \times B$</td></tr>
+          <tr><td>Min Nyquist BW</td><td>$R_b / 2$</td></tr>
+          <tr><td>SQNR (uniform, sinusoid)</td><td>$6.02B + 1.76$ dB</td></tr>
+          <tr><td>μ-law compression</td><td>$\text{sgn}(x)\frac{\ln(1+\mu|x|)}{\ln(1+\mu)}$</td></tr>
+          <tr><td>A-law compression</td><td>Piecewise: linear for small $|x|$, log for large $|x|$</td></tr>
+          <tr><td>DPCM encoding</td><td>$e(n)=m(n)-\hat{m}(n)$</td></tr>
+          <tr><td>DM step condition</td><td>$\delta > 2\pi f_m A_m / f_s$</td></tr>
+          <tr><td>T1 rate</td><td>1.544 Mbps (24 ch)</td></tr>
+          <tr><td>E1 rate</td><td>2.048 Mbps (32 ch)</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/pcm-encode.js"></script>
+<script src="sim/companding.js"></script>
+<script src="sim/pcm-snr.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});});</script>
+<script>
+(function(){const c=document.getElementById('hero-canvas');if(!c)return;const ctx=c.getContext('2d');let W,H,t=0;
+function resize(){const r=c.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;c.width=W*d;c.height=H*d;c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);}
+resize();window.addEventListener('resize',resize);
+function draw(){t+=0.05;ctx.clearRect(0,0,W,H);ctx.font='bold 12px JetBrains Mono';ctx.globalAlpha=0.15;
+  for(let i=0;i<20;i++){const y=((i*25+t*20)%H);const bits='10110011'.split('');
+    for(let j=0;j<bits.length;j++){ctx.fillStyle=bits[j]==='1'?'#38bdf8':'#fb7185';ctx.fillText(bits[j],j*20+((i%3)*60),y);}}
+  ctx.globalAlpha=1;requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
+</script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 7 — Line Coding | Communication Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><a href="../../index.html" class="sidebar-logo">Comm-Sys</a></div>
+  <ul class="sidebar-nav">
+    <li><a href="../01-am-modulation/index.html">1 — AM Modulation</a></li>
+    <li><a href="../02-dsbsc-ssb-vsb/index.html">2 — DSB-SC / SSB / VSB</a></li>
+    <li><a href="../03-angle-modulation/index.html">3 — Angle Modulation</a></li>
+    <li><a href="../04-sampling-quantization/index.html">4 — Sampling &amp; Quantization</a></li>
+    <li><a href="../05-pulse-modulation/index.html">5 — Pulse Modulation</a></li>
+    <li><a href="../06-pcm/index.html">6 — PCM &amp; TDM</a></li>
+    <li><a href="../07-line-coding/index.html" class="active">7 — Line Coding</a></li>
+    <li><a href="../08-isi-pulse-shaping/index.html">8 — ISI &amp; Pulse Shaping</a></li>
+    <li><a href="../09-digital-receivers/index.html">9 — Digital Receivers</a></li>
+  </ul>
+</nav>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+<div class="progress-bar" id="progress-bar"></div>
+
+<main class="main-content">
+  <div class="content-wrapper">
+    <section class="hero">
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <div class="hero-body">
+        <span class="hero-chip">Chapter 7</span>
+        <h1>Line Coding</h1>
+        <p>NRZ, RZ, Manchester, AMI, and differential encoding — waveforms, PSD, bandwidth, DC balance, and eye diagrams.</p>
+      </div>
+    </section>
+
+    <aside class="toc" id="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#nrz">NRZ Codes</a></li>
+        <li><a href="#rz">RZ Code</a></li>
+        <li><a href="#manchester">Manchester</a></li>
+        <li><a href="#ami">AMI / HDB3</a></li>
+        <li><a href="#psd">Power Spectral Density</a></li>
+        <li><a href="#eye">Eye Diagrams</a></li>
+        <li><a href="#comparison">Comparison</a></li>
+        <li><a href="#sim-codes">Sim: Line Codes</a></li>
+        <li><a href="#sim-psd">Sim: PSD</a></li>
+        <li><a href="#sim-eye">Sim: Eye Diagram</a></li>
+        <li><a href="#quick-ref">Quick Reference</a></li>
+      </ul>
+    </aside>
+
+    <article class="chapter-body">
+      <h2 id="overview">Overview</h2>
+      <p><strong>Line coding</strong> converts a sequence of binary data into a waveform suitable for baseband transmission. Key properties to consider:</p>
+      <ul>
+        <li><strong>DC balance:</strong> Zero DC component prevents baseline wander in AC-coupled channels.</li>
+        <li><strong>Self-clocking:</strong> Frequent transitions allow clock recovery at the receiver.</li>
+        <li><strong>Bandwidth efficiency:</strong> Minimum bandwidth for given data rate.</li>
+        <li><strong>Error detection:</strong> Some codes have built-in error detection capability.</li>
+      </ul>
+
+      <h2 id="nrz">NRZ Codes</h2>
+      <h3>NRZ-L (Non-Return-to-Zero Level)</h3>
+      <p>1 → +V, 0 → −V. Simple but has DC component and no self-clocking.</p>
+      <h3>NRZ-I (Non-Return-to-Zero Inverted)</h3>
+      <p>1 → transition, 0 → no transition. Differential encoding provides immunity to polarity inversion.</p>
+      <div class="eq-card">
+        $$\text{NRZ Bandwidth:}\quad B_{min} = \frac{R_b}{2} = \frac{1}{2T_b}$$
+      </div>
+
+      <h2 id="rz">Return-to-Zero (RZ)</h2>
+      <p>Signal returns to zero in the middle of each bit interval. 1 → +V then 0, 0 → −V then 0.</p>
+      <div class="eq-card">
+        $$\text{RZ Bandwidth:}\quad B_{min} = R_b = \frac{1}{T_b}$$
+      </div>
+      <p>RZ requires twice the bandwidth of NRZ but provides self-clocking.</p>
+
+      <h2 id="manchester">Manchester Coding</h2>
+      <p>Also called biphase-L. Each bit has a mid-bit transition: 1 → high-to-low, 0 → low-to-high. Used in 10 Mbps Ethernet.</p>
+      <div class="eq-card eq-highlight">
+        $$\text{Manchester Bandwidth:}\quad B_{min} = R_b = \frac{1}{T_b}$$
+      </div>
+      <p>Advantages: guaranteed self-clocking, zero DC component, error detection (missing transitions).</p>
+      <p><strong>Differential Manchester:</strong> Transition at mid-bit always present (for clocking). Transition at bit boundary encodes data (no transition = 1, transition = 0).</p>
+
+      <h2 id="ami">AMI &amp; HDB3</h2>
+      <p><strong>Alternate Mark Inversion (AMI):</strong> 0 → 0V, 1 → alternating +V/−V. Zero DC, but long runs of zeros lose clock sync.</p>
+      <p><strong>HDB3 (High-Density Bipolar 3):</strong> Replaces runs of 4+ zeros with a violation pattern to maintain clock sync while preserving zero DC property.</p>
+
+      <h2 id="psd">Power Spectral Density</h2>
+      <div class="eq-card eq-highlight">
+        $$S_{NRZ\text{-}L}(f) = T_b\,\text{sinc}^2(fT_b)$$
+      </div>
+      <div class="eq-card">
+        $$S_{Manchester}(f) = T_b\,\text{sinc}^2\!\left(\frac{fT_b}{2}\right)\sin^2\!\left(\frac{\pi f T_b}{2}\right)$$
+      </div>
+      <div class="eq-card">
+        $$S_{AMI}(f) = T_b\,\text{sinc}^2(fT_b)\sin^2(\pi fT_b)$$
+      </div>
+      <p>Note: NRZ-L has energy at DC. Manchester and AMI have nulls at DC → no baseline wander.</p>
+
+      <h2 id="eye">Eye Diagrams</h2>
+      <p>An eye diagram is formed by superimposing successive symbol-period segments of the received waveform. Key measurements:</p>
+      <ul>
+        <li><strong>Eye opening (vertical):</strong> Noise margin — larger is better</li>
+        <li><strong>Eye width (horizontal):</strong> Timing margin — wider allows more jitter tolerance</li>
+        <li><strong>Best sampling instant:</strong> Where eye is most open (maximum separation)</li>
+        <li><strong>Zero crossings spread:</strong> Timing jitter indicator</li>
+      </ul>
+
+      <h2 id="comparison">Comparison Table</h2>
+      <table class="ref-table">
+        <thead><tr><th>Code</th><th>BW</th><th>DC Balance</th><th>Clock Recovery</th><th>Error Detection</th></tr></thead>
+        <tbody>
+          <tr><td>NRZ-L</td><td>$R_b/2$</td><td>No</td><td>Poor</td><td>No</td></tr>
+          <tr><td>NRZ-I</td><td>$R_b/2$</td><td>No</td><td>Fair</td><td>No</td></tr>
+          <tr><td>RZ</td><td>$R_b$</td><td>No</td><td>Good</td><td>No</td></tr>
+          <tr><td>Manchester</td><td>$R_b$</td><td>Yes</td><td>Excellent</td><td>Yes</td></tr>
+          <tr><td>AMI</td><td>$R_b/2$</td><td>Yes</td><td>Fair*</td><td>Yes (BPV)</td></tr>
+          <tr><td>HDB3</td><td>$R_b/2$</td><td>Yes</td><td>Good</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ━━━ Simulations ━━━ -->
+      <h2 id="sim-codes">Simulation — Line Codes</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Bit sequence:
+            <input type="text" id="linecode-bits" value="10110010" maxlength="16" style="width:140px;background:#0f1629;color:#e2e8f0;border:1px solid #334155;padding:4px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace">
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="linecode-type" value="nrz-l" checked> NRZ-L</label>
+            <label><input type="radio" name="linecode-type" value="nrz-i"> NRZ-I</label>
+            <label><input type="radio" name="linecode-type" value="rz"> RZ</label>
+            <label><input type="radio" name="linecode-type" value="manchester"> Manchester</label>
+            <label><input type="radio" name="linecode-type" value="diff-manchester"> Diff Manchester</label>
+            <label><input type="radio" name="linecode-type" value="ami"> AMI</label>
+          </div>
+        </div>
+        <canvas id="linecode-canvas"></canvas>
+      </div>
+
+      <h2 id="sim-psd">Simulation — Power Spectral Density</h2>
+      <div class="sim-panel">
+        <div class="sim-controls psd-toggle">
+          <label><input type="checkbox" checked> NRZ-L</label>
+          <label><input type="checkbox" checked> Manchester</label>
+          <label><input type="checkbox" checked> AMI</label>
+        </div>
+        <div class="chart-container">
+          <canvas id="psd-chart"></canvas>
+        </div>
+      </div>
+
+      <h2 id="sim-eye">Simulation — Eye Diagram</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <div class="toggle-group">
+            <label><input type="radio" name="eye-code" value="nrz-l" checked> NRZ-L</label>
+            <label><input type="radio" name="eye-code" value="manchester"> Manchester</label>
+            <label><input type="radio" name="eye-code" value="ami"> AMI</label>
+          </div>
+          <label>Noise σ:
+            <input type="range" id="eye-noise" min="0" max="0.5" step="0.01" value="0.1">
+            <span id="eye-noise-val">0.1</span>
+          </label>
+          <label>Traces:
+            <input type="range" id="eye-traces" min="10" max="200" step="10" value="50">
+            <span id="eye-traces-val">50</span>
+          </label>
+        </div>
+        <canvas id="eye-canvas"></canvas>
+        <div class="sim-readouts">
+          <span>Eye opening: <strong id="eye-opening">—</strong></span>
+        </div>
+      </div>
+
+      <h2 id="quick-ref">Quick Reference</h2>
+      <table class="ref-table">
+        <thead><tr><th>Quantity</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><td>NRZ bandwidth</td><td>$R_b / 2$</td></tr>
+          <tr><td>Manchester bandwidth</td><td>$R_b$</td></tr>
+          <tr><td>NRZ-L PSD</td><td>$T_b\,\text{sinc}^2(fT_b)$</td></tr>
+          <tr><td>Manchester PSD</td><td>$T_b\,\text{sinc}^2(fT_b/2)\sin^2(\pi fT_b/2)$</td></tr>
+          <tr><td>AMI PSD</td><td>$T_b\,\text{sinc}^2(fT_b)\sin^2(\pi fT_b)$</td></tr>
+          <tr><td>First null BW (NRZ)</td><td>$1/T_b = R_b$</td></tr>
+          <tr><td>First null BW (Manchester)</td><td>$2/T_b = 2R_b$</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/line-codes.js"></script>
+<script src="sim/psd-plot.js"></script>
+<script src="sim/eye-diagram.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});});</script>
+<script>
+(function(){const c=document.getElementById('hero-canvas');if(!c)return;const ctx=c.getContext('2d');let W,H,t=0;
+function resize(){const r=c.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;c.width=W*d;c.height=H*d;c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);}
+resize();window.addEventListener('resize',resize);
+function draw(){t+=0.03;ctx.clearRect(0,0,W,H);
+  const bits=[1,0,1,1,0,0,1,0,1,1,0,1];ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.globalAlpha=0.3;ctx.beginPath();
+  const bw=W/bits.length;for(let i=0;i<bits.length;i++){const level=bits[i]?-1:1;const y=H/2+level*20;const phase=Math.sin(t+i*0.5)*10;ctx.lineTo(i*bw,y+phase);ctx.lineTo((i+1)*bw,y+phase);}ctx.stroke();ctx.globalAlpha=1;requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
+</script>
+</body>
+</html>
