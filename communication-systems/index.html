@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Communication Systems — An Interactive Journey</title>
+  <meta name="description" content="A complete, interactive web-based textbook covering Communication Systems theory from AM modulation to digital receivers.">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/math.css">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" aria-label="Toggle theme"></button>
+
+<!-- Hamburger -->
+<button class="hamburger" aria-label="Toggle navigation">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay"></div>
+
+<div class="page-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-header">
+      <h2>CommSys</h2>
+      <div class="subtitle">Interactive Textbook</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html" class="active"><span class="chapter-num">⌂</span> Home</a></li>
+      <li><a href="chapters/01-am-modulation/index.html"><span class="chapter-num">01</span> AM Modulation</a></li>
+      <li><a href="chapters/02-dsbsc-ssb-vsb/index.html"><span class="chapter-num">02</span> DSB-SC, SSB &amp; VSB</a></li>
+      <li><a href="chapters/03-angle-modulation/index.html"><span class="chapter-num">03</span> Angle Modulation</a></li>
+      <li><a href="chapters/04-sampling-quantization/index.html"><span class="chapter-num">04</span> Sampling &amp; Quantization</a></li>
+      <li><a href="chapters/05-pulse-modulation/index.html"><span class="chapter-num">05</span> Pulse Modulation</a></li>
+      <li><a href="chapters/06-pcm/index.html"><span class="chapter-num">06</span> PCM</a></li>
+      <li><a href="chapters/07-line-coding/index.html"><span class="chapter-num">07</span> Line Coding</a></li>
+      <li><a href="chapters/08-isi-pulse-shaping/index.html"><span class="chapter-num">08</span> ISI &amp; Pulse Shaping</a></li>
+      <li><a href="chapters/09-digital-receivers/index.html"><span class="chapter-num">09</span> Digital Receivers</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-area">
+
+      <!-- Hero -->
+      <div class="landing-hero">
+        <canvas id="hero-canvas" aria-label="Animated waveforms: AM, FM, and digital signals flowing across screen"></canvas>
+        <div class="landing-hero-text">
+          <h1>Communication Systems</h1>
+          <p>An Interactive Journey — From Analog Modulation to Digital Transmission</p>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-summary" id="progress-summary">
+        Progress: <span id="progress-count">0</span>/9 chapters visited
+      </div>
+
+      <!-- Chapter Cards -->
+      <div class="chapter-grid" id="chapter-grid">
+
+        <div class="chapter-card" data-chapter="01">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="am" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 01</span>
+          <h3>Amplitude Modulation</h3>
+          <p>Standard AM, modulation index, spectrum, power analysis. Envelope &amp; coherent demodulation with interactive waveform builders.</p>
+          <a href="chapters/01-am-modulation/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="02">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="dsbsc" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 02</span>
+          <h3>DSB-SC, SSB &amp; VSB</h3>
+          <p>Suppressed-carrier modulation, single sideband via Hilbert transform, vestigial sideband filter design and spectrum analysis.</p>
+          <a href="chapters/02-dsbsc-ssb-vsb/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="03">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="fm" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 03</span>
+          <h3>Angle Modulation</h3>
+          <p>Phase and frequency modulation, Bessel function spectra, Carson's rule, PLL demodulation, and FM noise analysis.</p>
+          <a href="chapters/03-angle-modulation/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="04">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="sampling" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 04</span>
+          <h3>Sampling &amp; Quantization</h3>
+          <p>Nyquist-Shannon theorem, aliasing visualizer, uniform &amp; non-uniform quantization, μ-law and A-law companding.</p>
+          <a href="chapters/04-sampling-quantization/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="05">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="pam" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 05</span>
+          <h3>Pulse Modulation</h3>
+          <p>PAM, PDM/PWM, and PPM waveform generation. Natural vs flat-top sampling, aperture effect, comparative analysis.</p>
+          <a href="chapters/05-pulse-modulation/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="06">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="pcm" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 06</span>
+          <h3>PCM</h3>
+          <p>Pulse Code Modulation pipeline: sample, quantize, encode. Companding curves, DPCM, delta modulation, T1 carrier.</p>
+          <a href="chapters/06-pcm/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="07">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="line" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 07</span>
+          <h3>Line Coding</h3>
+          <p>NRZ, RZ, AMI, Manchester, HDB3 — waveform animator, PSD plots, and eye diagram generation with noise analysis.</p>
+          <a href="chapters/07-line-coding/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="08">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="rc" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 08</span>
+          <h3>ISI &amp; Pulse Shaping</h3>
+          <p>Inter-symbol interference, Nyquist criterion, raised cosine &amp; SRRC filters, matched filter SNR optimization.</p>
+          <a href="chapters/08-isi-pulse-shaping/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+
+        <div class="chapter-card" data-chapter="09">
+          <div class="card-preview wave-preview" aria-hidden="true">
+            <canvas class="card-canvas" data-type="const" width="280" height="60"></canvas>
+          </div>
+          <span class="ch-num">Chapter 09</span>
+          <h3>Digital Receivers</h3>
+          <p>ASK, FSK, BPSK, QPSK, QAM constellations, BER curves, and Shannon capacity — interactive Monte Carlo simulations.</p>
+          <a href="chapters/09-digital-receivers/index.html" class="start-btn">Start Chapter →</a>
+        </div>
+      </div>
+
+      <!-- Key Equations at a Glance -->
+      <div class="equations-glance">
+        <h2>Key Equations at a Glance</h2>
+        <div class="eq-row" data-eq-tooltip="Carrier amplitude varies with the message signal">
+          <span class="eq-name">AM Signal</span>
+          <span class="eq-math">$$s(t) = A_c[1+\mu\cos(2\pi f_m t)]\cos(2\pi f_c t)$$</span>
+          <span class="eq-tooltip">Carrier amplitude modulated by message</span>
+        </div>
+        <div class="eq-row" data-eq-tooltip="Instantaneous frequency varies with message integral">
+          <span class="eq-name">FM Signal</span>
+          <span class="eq-math">$$s(t) = A_c\cos\!\left[2\pi f_c t + 2\pi k_f \int_0^t m(\tau)\,d\tau\right]$$</span>
+          <span class="eq-tooltip">Frequency deviation tracks the message</span>
+        </div>
+        <div class="eq-row" data-eq-tooltip="Each additional bit adds 6.02 dB of SQNR">
+          <span class="eq-name">PCM SQNR</span>
+          <span class="eq-math">$$\text{SQNR} \approx 1.76 + 6.02n \text{ dB}$$</span>
+          <span class="eq-tooltip">Quantization quality scales with bit depth</span>
+        </div>
+        <div class="eq-row" data-eq-tooltip="Folded spectrum must be flat for zero ISI">
+          <span class="eq-name">Nyquist Criterion</span>
+          <span class="eq-math">$$\sum_{k} P\!\left(f - \frac{k}{T_b}\right) = T_b$$</span>
+          <span class="eq-tooltip">ISI-free pulse shaping condition</span>
+        </div>
+        <div class="eq-row" data-eq-tooltip="Maximum data rate over a noisy channel">
+          <span class="eq-name">Shannon Capacity</span>
+          <span class="eq-math">$$C = B\log_2(1 + \text{SNR})$$</span>
+          <span class="eq-tooltip">Channel capacity: the ultimate limit</span>
+        </div>
+        <div class="eq-row" data-eq-tooltip="Bit error rate for optimally detected BPSK">
+          <span class="eq-name">BER (BPSK)</span>
+          <span class="eq-math">$$P_b = Q\!\left(\sqrt{\frac{2E_b}{N_0}}\right)$$</span>
+          <span class="eq-tooltip">BPSK has the best BER for binary modulation</span>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </main>
+</div><!-- /page-wrapper -->
+
+<!-- Scripts -->
+<script src="assets/js/simulations.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/nav.js"></script>
+
+<script>
+// ===== Hero Canvas Animation =====
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, time = 0, animId;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width = rect.width * (window.devicePixelRatio || 1);
+    H = canvas.height = rect.height * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+  }
+
+  function drawWave(yCenter, amp, freq, phase, color, lineW) {
+    const w = W / (window.devicePixelRatio || 1);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineW || 1.5;
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const t = x / w * 8 * Math.PI + phase;
+      let y = yCenter + amp * Math.sin(freq * t);
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function draw(ts) {
+    const w = W / (window.devicePixelRatio || 1);
+    const h = H / (window.devicePixelRatio || 1);
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = '#1e2d4a';
+    ctx.lineWidth = 0.3;
+    for (let gx = 0; gx < w; gx += 40) { ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
+    for (let gy = 0; gy < h; gy += 40) { ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
+
+    time += 0.008;
+
+    // AM wave (top third)
+    const amCenter = h * 0.2;
+    const mu = 0.6;
+    ctx.strokeStyle = '#2dd4bf';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const t = x / w * 10 * Math.PI + time * 3;
+      const env = 1 + mu * Math.sin(0.3 * t);
+      const y = amCenter + 25 * env * Math.sin(5 * t);
+      if (x === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // FM wave (middle third)
+    const fmCenter = h * 0.5;
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const t = x / w * 10 * Math.PI + time * 2;
+      const phase = 5 * t + 3 * Math.sin(0.4 * t);
+      const y = fmCenter + 22 * Math.cos(phase);
+      if (x === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // Digital pulse train (bottom third)
+    const digCenter = h * 0.8;
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const bits = [1,0,1,1,0,1,0,0,1,1,0,1,0,1,1,0];
+    const bitW = w / bits.length;
+    const scrollX = (time * 40) % bitW;
+    for (let i = 0; i < bits.length; i++) {
+      const bx = i * bitW - scrollX;
+      const by = digCenter + (bits[i] ? -15 : 15);
+      if (i === 0) ctx.moveTo(bx, by);
+      ctx.lineTo(bx, by);
+      ctx.lineTo(bx + bitW, by);
+    }
+    ctx.stroke();
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  animId = requestAnimationFrame(draw);
+})();
+
+// ===== Card Mini-Canvas Animations =====
+(function() {
+  const cardCanvases = document.querySelectorAll('.card-canvas');
+  let time = 0;
+
+  function drawCardPreviews() {
+    time += 0.02;
+    cardCanvases.forEach(function(canvas) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      const type = canvas.dataset.type;
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineWidth = 1.5;
+
+      const mid = h / 2;
+      switch(type) {
+        case 'am':
+          ctx.strokeStyle = '#2dd4bf';
+          ctx.beginPath();
+          for (let x = 0; x < w; x++) {
+            const t = x / w * 6 * Math.PI + time * 2;
+            ctx.lineTo(x, mid + 18 * (1 + 0.5 * Math.sin(0.3 * t)) * Math.sin(4 * t) / 1.5);
+          }
+          ctx.stroke();
+          break;
+        case 'dsbsc':
+          ctx.strokeStyle = '#38bdf8';
+          ctx.beginPath();
+          for (let x = 0; x < w; x++) {
+            const t = x / w * 6 * Math.PI + time * 2;
+            ctx.lineTo(x, mid + 20 * Math.sin(0.4 * t) * Math.cos(4 * t));
+          }
+          ctx.stroke();
+          break;
+        case 'fm':
+          ctx.strokeStyle = '#fbbf24';
+          ctx.beginPath();
+          for (let x = 0; x < w; x++) {
+            const t = x / w * 8 * Math.PI + time * 2;
+            ctx.lineTo(x, mid + 18 * Math.cos(4 * t + 2 * Math.sin(0.5 * t)));
+          }
+          ctx.stroke();
+          break;
+        case 'sampling':
+          ctx.strokeStyle = '#2dd4bf44';
+          ctx.beginPath();
+          for (let x = 0; x < w; x++) { ctx.lineTo(x, mid + 15 * Math.sin(x / w * 4 * Math.PI + time)); }
+          ctx.stroke();
+          ctx.strokeStyle = '#2dd4bf';
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 12; i++) {
+            const sx = (i / 12) * w + (time * 8) % (w / 12);
+            const sy = mid + 15 * Math.sin(sx / w * 4 * Math.PI + time);
+            ctx.beginPath(); ctx.moveTo(sx, mid); ctx.lineTo(sx, sy); ctx.stroke();
+            ctx.fillStyle = '#2dd4bf';
+            ctx.beginPath(); ctx.arc(sx, sy, 2, 0, Math.PI * 2); ctx.fill();
+          }
+          break;
+        case 'pam':
+          ctx.fillStyle = '#38bdf8';
+          for (let i = 0; i < 14; i++) {
+            const px = i * w / 14;
+            const ph = 12 + 10 * Math.sin(i * 0.8 + time);
+            ctx.fillRect(px + 2, mid - ph / 2, w / 14 - 4, ph);
+          }
+          break;
+        case 'pcm':
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i < 16; i++) {
+            const lv = Math.round(3 * Math.sin(i * 0.6 + time)) * 5;
+            const px = i * w / 16;
+            ctx.lineTo(px, mid - lv);
+            ctx.lineTo(px + w / 16, mid - lv);
+          }
+          ctx.stroke();
+          break;
+        case 'line':
+          ctx.strokeStyle = '#fb7185';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          var bits = [1,-1,1,1,-1,1,-1,-1,1,-1,1,1,-1,1];
+          for (let i = 0; i < bits.length; i++) {
+            var bx0 = i * w / bits.length;
+            var bx1 = (i + 1) * w / bits.length;
+            ctx.lineTo(bx0, mid - bits[i] * 12);
+            ctx.lineTo(bx1, mid - bits[i] * 12);
+          }
+          ctx.stroke();
+          break;
+        case 'rc':
+          ctx.strokeStyle = '#2dd4bf';
+          ctx.beginPath();
+          for (let x = 0; x < w; x++) {
+            const t = (x - w / 2) / 30;
+            const v = sinc(t) * Math.cos(0.5 * Math.PI * t) / (1 - (t) * (t));
+            ctx.lineTo(x, mid - (isFinite(v) ? v : 0) * 25);
+          }
+          ctx.stroke();
+          break;
+        case 'const':
+          var pts = [[1,1],[-1,1],[-1,-1],[1,-1],[1,0],[-1,0],[0,1],[0,-1]];
+          pts.forEach(function(p) {
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(w/2 + p[0]*20 + Math.sin(time+p[0])*2, mid + p[1]*15 + Math.cos(time+p[1])*2, 3, 0, Math.PI*2);
+            ctx.fill();
+          });
+          break;
+      }
+    });
+    requestAnimationFrame(drawCardPreviews);
+  }
+  drawCardPreviews();
+})();
+
+// ===== Progress Tracker =====
+(function() {
+  const visited = JSON.parse(localStorage.getItem('visited_chapters') || '[]');
+  const countEl = document.getElementById('progress-count');
+  if (countEl) countEl.textContent = visited.length;
+
+  document.querySelectorAll('.chapter-card').forEach(function(card) {
+    const ch = card.dataset.chapter;
+    if (visited.includes(ch)) card.classList.add('visited');
+  });
+})();
+
+// ===== KaTeX Auto-Render =====
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2 — DSB-SC, SSB &amp; VSB | Communication Systems</title>
+  <link rel="stylesheet" href="../../assets/css/main.css">
+  <link rel="stylesheet" href="../../assets/css/math.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="progress-bar"></div>
+<button class="theme-toggle" aria-label="Toggle theme"></button>
+<button class="hamburger" aria-label="Toggle navigation"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+<div class="sidebar-overlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-header"><h2>CommSys</h2><div class="subtitle">Interactive Textbook</div></div>
+    <ul class="sidebar-nav">
+      <li><a href="../../index.html"><span class="chapter-num">⌂</span> Home</a></li>
+      <li><a href="../01-am-modulation/index.html"><span class="chapter-num">01</span> AM Modulation</a></li>
+      <li><a href="../02-dsbsc-ssb-vsb/index.html" class="active"><span class="chapter-num">02</span> DSB-SC, SSB &amp; VSB</a></li>
+      <li><a href="../03-angle-modulation/index.html"><span class="chapter-num">03</span> Angle Modulation</a></li>
+      <li><a href="../04-sampling-quantization/index.html"><span class="chapter-num">04</span> Sampling &amp; Quantization</a></li>
+      <li><a href="../05-pulse-modulation/index.html"><span class="chapter-num">05</span> Pulse Modulation</a></li>
+      <li><a href="../06-pcm/index.html"><span class="chapter-num">06</span> PCM</a></li>
+      <li><a href="../07-line-coding/index.html"><span class="chapter-num">07</span> Line Coding</a></li>
+      <li><a href="../08-isi-pulse-shaping/index.html"><span class="chapter-num">08</span> ISI &amp; Pulse Shaping</a></li>
+      <li><a href="../09-digital-receivers/index.html"><span class="chapter-num">09</span> Digital Receivers</a></li>
+    </ul>
+  </aside>
+  <main class="main-content"><div class="content-area">
+
+    <div class="hero">
+      <canvas id="ch2-hero" aria-label="DSB-SC waveform with phase reversals"></canvas>
+      <div class="hero-overlay"><h1>Chapter 2 — DSB-SC, SSB &amp; VSB</h1><p>Suppressed-carrier and single/vestigial sideband modulation techniques</p></div>
+    </div>
+
+    <nav class="toc-aside" aria-label="Table of contents"><h4>On this page</h4>
+      <ul>
+        <li><a href="#dsbsc">DSB-SC Theory</a></li>
+        <li><a href="#ssb">SSB Theory</a></li>
+        <li><a href="#vsb">VSB Theory</a></li>
+        <li><a href="#comparison">Comparison Table</a></li>
+        <li><a href="#sim1">Sim: DSB-SC Waveform</a></li>
+        <li><a href="#sim2">Sim: SSB Filter</a></li>
+        <li><a href="#sim3">Sim: VSB Response</a></li>
+        <li><a href="#quickref">Quick Reference</a></li>
+      </ul>
+    </nav>
+
+    <h2 id="dsbsc">DSB-SC (Double Sideband Suppressed Carrier)</h2>
+    <p>By removing the carrier from AM, all power is in the sidebands:</p>
+    <div class="equation-card">
+      <div class="eq-label">Key Result — DSB-SC Signal</div>
+      <div class="eq-body">$$s_{DSB}(t) = A_c\, m(t)\cos(2\pi f_c t)$$</div>
+      <div class="eq-interp">The carrier amplitude is directly proportional to m(t), with phase reversals at zero-crossings.</div>
+    </div>
+
+    <details><summary>Derivation: Phase Reversals and Coherent Demodulation</summary><div class="details-body">
+      <p>When $m(t)$ changes sign, the factor $m(t)\cos(2\pi f_c t)$ undergoes a 180° phase shift. The spectrum is:</p>
+      $$S_{DSB}(f)=\frac{A_c}{2}[M(f-f_c)+M(f+f_c)]$$
+      <p>Bandwidth: $B_T = 2W$ (same as AM). Efficiency: 100% — all power carries information.</p>
+      <p><strong>Coherent demodulation:</strong> Multiply by $\cos(2\pi f_c t + \phi)$ and LPF:</p>
+      $$y(t)=\frac{A_c}{2}m(t)\cos\phi$$
+      <p>A phase error $\phi$ scales the output by $\cos\phi$. At $\phi = 90°$, the output vanishes entirely — motivating the Costas loop for carrier recovery.</p>
+    </div></details>
+
+    <h2 id="ssb">SSB (Single Sideband)</h2>
+    <div class="equation-card">
+      <div class="eq-label">Key Result — SSB (USB) Signal</div>
+      <div class="eq-body">$$s_{USB}(t) = \frac{A_c}{2}\left[m(t)\cos(2\pi f_c t) - \hat{m}(t)\sin(2\pi f_c t)\right]$$</div>
+      <div class="eq-interp">The Hilbert transform $\hat{m}(t)$ shifts all frequency components by 90°, enabling sideband cancellation.</div>
+    </div>
+
+    <details><summary>Derivation: SSB via Analytic Signal</summary><div class="details-body">
+      <p>Define the analytic signal $m_+(t) = m(t) + j\hat{m}(t)$. Its spectrum is one-sided: $M_+(f)=2M(f)u(f)$.</p>
+      <p>The SSB signal (USB) is obtained by modulating $m_+(t)$:</p>
+      $$s_{USB}(t)=\text{Re}\left\{\frac{A_c}{2}m_+(t)e^{j2\pi f_c t}\right\}$$
+      <p>Expanding the real part yields the expression above. For LSB, replace $-\hat{m}(t)$ with $+\hat{m}(t)$.</p>
+      <p>Bandwidth: $B_T = W$ — half that of DSB-SC. Power efficiency: 100%. SNR figure of merit: 1 (same as DSB-SC).</p>
+    </div></details>
+
+    <h2 id="vsb">VSB (Vestigial Sideband)</h2>
+    <details><summary>Derivation: VSB Filter Symmetry Condition</summary><div class="details-body">
+      <p>After filtering DSB-SC with $H_i(f)$ and coherent demodulation, the output spectrum is:</p>
+      $$Y(f) \propto M(f)[H_i(f-f_c)+H_i(f+f_c)]$$
+      <p>For distortion-free output: $H_i(f-f_c)+H_i(f+f_c)=\text{const}$ for $|f| \le W$.</p>
+      <p>This is a <strong>symmetry condition</strong> about $f_c$: the filter's transition band must have odd symmetry around the carrier.</p>
+      <p>The VSB bandwidth is $B_T \approx W + f_v$ where $f_v$ is the vestigial bandwidth retained from the unwanted sideband.</p>
+      <p>Example: NTSC TV uses $f_v = 0.75$ MHz, $W = 4.2$ MHz, so $B_T = 4.95$ MHz.</p>
+    </div></details>
+
+    <h2 id="comparison">Comparison Table</h2>
+    <div class="quick-ref"><table>
+      <thead><tr><th>Scheme</th><th>Bandwidth</th><th>Efficiency</th><th>SNR FOM</th><th>Demod</th><th>Application</th></tr></thead>
+      <tbody>
+        <tr><td>AM</td><td>$2W$</td><td>$\leq 33\%$</td><td>$\frac{\mu^2}{2+\mu^2}$</td><td>Envelope</td><td>Broadcast radio</td></tr>
+        <tr><td>DSB-SC</td><td>$2W$</td><td>100%</td><td>1</td><td>Coherent</td><td>Data modems</td></tr>
+        <tr><td>SSB</td><td>$W$</td><td>100%</td><td>1</td><td>Coherent</td><td>HF radio, telephony</td></tr>
+        <tr><td>VSB</td><td>$W + f_v$</td><td>100%</td><td>1</td><td>Coherent</td><td>TV broadcast</td></tr>
+      </tbody>
+    </table></div>
+
+    <!-- Simulations -->
+    <h2 id="sim1">Simulation 1: DSB-SC Waveform &amp; Phase Reversal</h2>
+    <div class="sim-panel">
+      <h3>DSB-SC Waveform Builder</h3>
+      <div class="sim-controls">
+        <div class="sim-control"><label>f<sub>c</sub></label><input type="range" id="dsbsc-fc" min="2" max="20" step="0.5" value="8" aria-label="Carrier frequency"><span class="value-display" id="dsbsc-fc-val">8</span></div>
+        <div class="sim-control"><label>f<sub>m</sub></label><input type="range" id="dsbsc-fm" min="0.2" max="5" step="0.1" value="1" aria-label="Message frequency"><span class="value-display" id="dsbsc-fm-val">1</span></div>
+        <div class="sim-control"><label>Phase φ°</label><input type="range" id="dsbsc-phase" min="0" max="360" step="1" value="0" aria-label="Phase offset"><span class="value-display" id="dsbsc-phase-val">0</span></div>
+        <div class="sim-control"><label>Speed</label><input type="range" id="dsbsc-speed" min="0.25" max="4" step="0.25" value="1" aria-label="Speed"><span class="value-display" id="dsbsc-speed-val">1</span></div>
+      </div>
+      <div class="sim-buttons">
+        <button class="sim-btn active" id="dsbsc-play-btn">⏸ Pause</button>
+        <button class="sim-btn" id="dsbsc-demod-btn">Show Demod Output</button>
+      </div>
+      <div class="sim-canvas-container"><canvas id="dsbsc-waveform-canvas" aria-label="DSB-SC waveform with phase reversal markers"></canvas></div>
+      <div class="sim-readouts">
+        <div class="readout"><div class="readout-label">cos φ</div><div class="readout-value" id="dsbsc-cos-phi">1.000</div></div>
+      </div>
+    </div>
+
+    <h2 id="sim2">Simulation 2: SSB Filter &amp; Sideband Selector</h2>
+    <div class="sim-panel">
+      <h3>SSB Sideband Selection</h3>
+      <div class="sim-controls">
+        <div class="sim-control"><label>f<sub>c</sub></label><input type="range" id="ssb-fc" min="4" max="20" step="1" value="8" aria-label="Carrier freq"><span class="value-display" id="ssb-fc-val">8</span></div>
+        <div class="sim-control"><label>f<sub>m</sub></label><input type="range" id="ssb-fm" min="0.5" max="5" step="0.1" value="1.5" aria-label="Message freq"><span class="value-display" id="ssb-fm-val">1.5</span></div>
+      </div>
+      <div class="sim-buttons">
+        <button class="sim-btn active" id="ssb-toggle-btn">Showing: USB</button>
+      </div>
+      <div class="sim-canvas-container"><canvas id="ssb-filter-canvas" aria-label="SSB filter selection showing USB and LSB"></canvas></div>
+    </div>
+
+    <h2 id="sim3">Simulation 3: VSB Filter Response</h2>
+    <div class="sim-panel">
+      <h3>VSB Filter Shape &amp; Symmetry</h3>
+      <div class="sim-controls">
+        <div class="sim-control"><label>f<sub>c</sub></label><input type="range" id="vsb-fc" min="5" max="20" step="1" value="10" aria-label="Carrier freq"><span class="value-display" id="vsb-fc-val">10</span></div>
+        <div class="sim-control"><label>W (msg BW)</label><input type="range" id="vsb-fm" min="1" max="8" step="0.5" value="4" aria-label="Message bandwidth"><span class="value-display" id="vsb-fm-val">4</span></div>
+        <div class="sim-control"><label>f<sub>v</sub> (vestigial)</label><input type="range" id="vsb-fv" min="0" max="4" step="0.1" value="1.5" aria-label="Vestigial bandwidth"><span class="value-display" id="vsb-fv-val">1.5</span></div>
+      </div>
+      <div class="sim-canvas-container"><canvas id="vsb-response-canvas" aria-label="VSB filter response and symmetry verification"></canvas></div>
+    </div>
+
+    <div class="quick-ref" id="quickref">
+      <h3>Quick Reference — Chapter 2</h3>
+      <table>
+        <thead><tr><th>Symbol</th><th>Description</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><td>$s_{DSB}(t)$</td><td>DSB-SC signal</td><td>$A_c m(t)\cos(2\pi f_c t)$</td></tr>
+          <tr><td>$s_{USB}(t)$</td><td>SSB (USB)</td><td>$\frac{A_c}{2}[m(t)\cos\omega_c t - \hat{m}(t)\sin\omega_c t]$</td></tr>
+          <tr><td>$\hat{m}(t)$</td><td>Hilbert transform</td><td>90° phase shift of all components</td></tr>
+          <tr><td>$H_i$</td><td>VSB filter condition</td><td>$H_i(f-f_c)+H_i(f+f_c)=\text{const}$</td></tr>
+          <tr><td>$B_T^{VSB}$</td><td>VSB bandwidth</td><td>$W + f_v$</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div></main>
+</div>
+
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/dsbsc-waveform.js"></script>
+<script src="sim/ssb-filter.js"></script>
+<script src="sim/vsb-response.js"></script>
+<script>
+(function(){const c=document.getElementById('ch2-hero');if(!c)return;const ctx=c.getContext('2d');let t=0;
+function resize(){const r=c.parentElement.getBoundingClientRect();const d=devicePixelRatio||1;c.width=r.width*d;c.height=260*d;c.style.width=r.width+'px';c.style.height='260px';ctx.setTransform(d,0,0,d,0,0);}
+resize();window.addEventListener('resize',resize);
+function draw(){const w=c.width/(devicePixelRatio||1),h=260;ctx.clearRect(0,0,w,h);t+=0.012;
+ctx.strokeStyle='#1e2d4a';ctx.lineWidth=0.3;for(let gx=0;gx<w;gx+=50){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,h);ctx.stroke();}
+ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.beginPath();
+for(let x=0;x<w;x+=2){const s=x/w*8*Math.PI+t*3;const m=Math.sin(0.3*s);const y=h/2+35*m*Math.cos(5*s);if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+ctx.stroke();requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
+document.addEventListener('DOMContentLoaded',function(){if(typeof renderMathInElement==='function'){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}});
+</script>
+</body>
+</html>
