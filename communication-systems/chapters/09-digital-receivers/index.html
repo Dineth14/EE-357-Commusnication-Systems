@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 9 — Digital Receivers | Communication Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><a href="../../index.html" class="sidebar-logo">Comm-Sys</a></div>
+  <ul class="sidebar-nav">
+    <li><a href="../01-am-modulation/index.html">1 — AM Modulation</a></li>
+    <li><a href="../02-dsbsc-ssb-vsb/index.html">2 — DSB-SC / SSB / VSB</a></li>
+    <li><a href="../03-angle-modulation/index.html">3 — Angle Modulation</a></li>
+    <li><a href="../04-sampling-quantization/index.html">4 — Sampling &amp; Quantization</a></li>
+    <li><a href="../05-pulse-modulation/index.html">5 — Pulse Modulation</a></li>
+    <li><a href="../06-pcm/index.html">6 — PCM &amp; TDM</a></li>
+    <li><a href="../07-line-coding/index.html">7 — Line Coding</a></li>
+    <li><a href="../08-isi-pulse-shaping/index.html">8 — ISI &amp; Pulse Shaping</a></li>
+    <li><a href="../09-digital-receivers/index.html" class="active">9 — Digital Receivers</a></li>
+  </ul>
+</nav>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+<div class="progress-bar" id="progress-bar"></div>
+
+<main class="main-content">
+  <div class="content-wrapper">
+    <section class="hero">
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <div class="hero-body">
+        <span class="hero-chip">Chapter 9</span>
+        <h1>Digital Receivers</h1>
+        <p>ASK, FSK, PSK, DPSK, QPSK, QAM — modulation schemes, BER analysis, constellation diagrams, and receiver architectures.</p>
+      </div>
+    </section>
+
+    <aside class="toc" id="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#ask">ASK</a></li>
+        <li><a href="#fsk">FSK</a></li>
+        <li><a href="#bpsk">BPSK</a></li>
+        <li><a href="#dpsk">DPSK</a></li>
+        <li><a href="#qpsk">QPSK</a></li>
+        <li><a href="#qam">M-QAM</a></li>
+        <li><a href="#ber-analysis">BER Analysis</a></li>
+        <li><a href="#sim-waveform">Sim: Waveforms</a></li>
+        <li><a href="#sim-ber">Sim: BER Curves</a></li>
+        <li><a href="#sim-constellation">Sim: Constellation</a></li>
+        <li><a href="#quick-ref">Quick Reference</a></li>
+      </ul>
+    </aside>
+
+    <article class="chapter-body">
+      <h2 id="overview">Overview</h2>
+      <p>Digital modulation maps binary data onto carrier signal parameters (amplitude, frequency, or phase). The choice of scheme involves trade-offs between <strong>bandwidth efficiency</strong> (bits/s/Hz), <strong>power efficiency</strong> (BER at given $E_b/N_0$), and <strong>implementation complexity</strong>.</p>
+
+      <h2 id="ask">Amplitude Shift Keying (ASK)</h2>
+      <p>Binary ASK (OOK — On-Off Keying) switches the carrier on/off:</p>
+      <div class="eq-card">
+        $$s(t) = \begin{cases}A_c\cos(2\pi f_c t) & \text{bit '1'}\\0 & \text{bit '0'}\end{cases}$$
+      </div>
+      <p>Coherent detection BER: $P_e = Q\!\left(\sqrt{E_b/N_0}\right)$. Simple but poor noise performance.</p>
+
+      <h2 id="fsk">Frequency Shift Keying (FSK)</h2>
+      <p>Binary FSK uses two distinct frequencies for 0 and 1:</p>
+      <div class="eq-card">
+        $$s(t) = A_c\cos(2\pi f_i t), \quad f_i = \begin{cases}f_1 & \text{bit '1'}\\f_2 & \text{bit '0'}\end{cases}$$
+      </div>
+      <div class="eq-card eq-highlight">
+        $$P_e^{coh} = Q\!\left(\sqrt{E_b/N_0}\right), \qquad P_e^{ncoh} = \frac{1}{2}e^{-E_b/(2N_0)}$$
+      </div>
+
+      <h2 id="bpsk">Binary Phase Shift Keying (BPSK)</h2>
+      <p>BPSK encodes data in the carrier phase (0° or 180°):</p>
+      <div class="eq-card">
+        $$s(t) = A_c\cos(2\pi f_c t + \phi), \quad \phi = \begin{cases}0 & \text{bit '1'}\\\pi & \text{bit '0'}\end{cases}$$
+      </div>
+      <p>Equivalently: $s(t) = (\pm 1)\cdot A_c\cos(2\pi f_c t)$. BER:</p>
+      <div class="eq-card eq-gold">
+        $$P_e = Q\!\left(\sqrt{\frac{2E_b}{N_0}}\right)$$
+      </div>
+      <p>BPSK is the most power-efficient binary scheme — 3 dB better than coherent FSK/ASK.</p>
+
+      <h2 id="dpsk">Differential PSK (DPSK)</h2>
+      <p>Avoids the need for a coherent reference by encoding data in phase <em>changes</em>:</p>
+      <div class="eq-card">
+        $$\phi_k = \phi_{k-1} + \Delta\phi, \quad \Delta\phi = \begin{cases}0 & \text{bit '1'}\\\pi & \text{bit '0'}\end{cases}$$
+      </div>
+      <div class="eq-card eq-highlight">
+        $$P_e = \frac{1}{2}e^{-E_b/N_0}$$
+      </div>
+      <p>About 1 dB worse than coherent BPSK, but much simpler receiver (no carrier recovery needed).</p>
+
+      <h2 id="qpsk">Quadrature PSK (QPSK)</h2>
+      <p>QPSK transmits 2 bits per symbol using four phase states:</p>
+      <div class="eq-card">
+        $$s(t) = A_c\cos(2\pi f_c t + \theta_k), \quad \theta_k \in \{45°, 135°, 225°, 315°\}$$
+      </div>
+      <p>Equivalently, using I-Q representation:</p>
+      <div class="eq-card eq-highlight">
+        $$s(t) = I_k\cos(2\pi f_c t) - Q_k\sin(2\pi f_c t)$$
+      </div>
+      <p>where $I_k, Q_k \in \{+1, -1\}$. QPSK has the <strong>same BER per bit</strong> as BPSK but <strong>twice the spectral efficiency</strong> (2 bits/s/Hz vs 1 bit/s/Hz).</p>
+
+      <h2 id="qam">M-ary QAM</h2>
+      <p>QAM modulates both amplitude and phase — combining ASK and PSK:</p>
+      <div class="eq-card">
+        $$s(t) = A_I\cos(2\pi f_c t) - A_Q\sin(2\pi f_c t)$$
+      </div>
+      <p>For $M$-QAM: $\log_2 M$ bits per symbol. Common values: 16-QAM (4 bits), 64-QAM (6 bits), 256-QAM (8 bits).</p>
+      <div class="eq-card eq-highlight">
+        $$P_e \approx 4\left(1-\frac{1}{\sqrt{M}}\right)Q\!\left(\sqrt{\frac{3E_b\log_2 M}{(M-1)N_0}}\right) \quad \text{(approx. for square QAM)}$$
+      </div>
+
+      <h2 id="ber-analysis">BER Performance Summary</h2>
+      <table class="ref-table">
+        <thead><tr><th>Scheme</th><th>BER Expression</th><th>$E_b/N_0$ for $P_e=10^{-5}$</th></tr></thead>
+        <tbody>
+          <tr><td>BPSK</td><td>$Q(\sqrt{2E_b/N_0})$</td><td>9.6 dB</td></tr>
+          <tr><td>QPSK</td><td>$Q(\sqrt{2E_b/N_0})$</td><td>9.6 dB</td></tr>
+          <tr><td>DPSK</td><td>$\frac{1}{2}e^{-E_b/N_0}$</td><td>10.3 dB</td></tr>
+          <tr><td>Coh. FSK</td><td>$Q(\sqrt{E_b/N_0})$</td><td>12.6 dB</td></tr>
+          <tr><td>Non-coh. FSK</td><td>$\frac{1}{2}e^{-E_b/(2N_0)}$</td><td>13.4 dB</td></tr>
+          <tr><td>Coh. ASK</td><td>$Q(\sqrt{E_b/N_0})$</td><td>12.6 dB</td></tr>
+          <tr><td>16-QAM</td><td>$\approx 3Q(\sqrt{4E_b/(5N_0)})$</td><td>13.5 dB</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ━━━ Simulations ━━━ -->
+      <h2 id="sim-waveform">Simulation — Digital Modulation Waveforms</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Bits:
+            <input type="text" id="askfskpsk-bits" value="10110010" maxlength="16" style="width:140px;background:#0f1629;color:#e2e8f0;border:1px solid #334155;padding:4px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace">
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="mod-scheme" value="ask"> ASK</label>
+            <label><input type="radio" name="mod-scheme" value="fsk"> FSK</label>
+            <label><input type="radio" name="mod-scheme" value="bpsk" checked> BPSK</label>
+            <label><input type="radio" name="mod-scheme" value="dpsk"> DPSK</label>
+          </div>
+          <button id="askfskpsk-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="askfskpsk-canvas"></canvas>
+      </div>
+
+      <h2 id="sim-ber">Simulation — BER Curves</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Eb/N0 (dB):
+            <input type="range" id="ber-highlight" min="-2" max="20" step="0.5" value="10">
+            <span id="ber-highlight-val">10</span>
+          </label>
+        </div>
+        <div class="chart-container">
+          <canvas id="ber-chart"></canvas>
+        </div>
+        <div class="sim-readouts">
+          <span>BPSK BER: <strong id="ber-readout">—</strong></span>
+        </div>
+      </div>
+
+      <h2 id="sim-constellation">Simulation — Constellation Diagram</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <div class="toggle-group">
+            <label><input type="radio" name="const-scheme" value="bpsk"> BPSK</label>
+            <label><input type="radio" name="const-scheme" value="qpsk" checked> QPSK</label>
+            <label><input type="radio" name="const-scheme" value="8psk"> 8-PSK</label>
+            <label><input type="radio" name="const-scheme" value="16qam"> 16-QAM</label>
+          </div>
+          <label>Noise σ:
+            <input type="range" id="const-noise" min="0" max="0.5" step="0.01" value="0.15">
+            <span id="const-noise-val">0.15</span>
+          </label>
+          <label>Points:
+            <input type="range" id="const-points" min="50" max="500" step="50" value="200">
+            <span id="const-points-val">200</span>
+          </label>
+        </div>
+        <canvas id="constellation-canvas"></canvas>
+      </div>
+
+      <h2 id="quick-ref">Quick Reference</h2>
+      <table class="ref-table">
+        <thead><tr><th>Quantity</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><td>BPSK BER</td><td>$Q(\sqrt{2E_b/N_0})$</td></tr>
+          <tr><td>QPSK BER</td><td>$Q(\sqrt{2E_b/N_0})$ (same as BPSK per bit)</td></tr>
+          <tr><td>DPSK BER</td><td>$\frac{1}{2}e^{-E_b/N_0}$</td></tr>
+          <tr><td>Coh. FSK BER</td><td>$Q(\sqrt{E_b/N_0})$</td></tr>
+          <tr><td>Non-coh. FSK BER</td><td>$\frac{1}{2}e^{-E_b/(2N_0)}$</td></tr>
+          <tr><td>BPSK spectral eff.</td><td>1 bit/s/Hz</td></tr>
+          <tr><td>QPSK spectral eff.</td><td>2 bits/s/Hz</td></tr>
+          <tr><td>M-QAM spectral eff.</td><td>$\log_2 M$ bits/s/Hz</td></tr>
+          <tr><td>Q-function</td><td>$Q(x)=\frac{1}{\sqrt{2\pi}}\int_x^\infty e^{-t^2/2}dt$</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/ask-fsk-psk.js"></script>
+<script src="sim/ber-curves.js"></script>
+<script src="sim/qpsk-qam.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});});</script>
+<script>
+(function(){const c=document.getElementById('hero-canvas');if(!c)return;const ctx=c.getContext('2d');let W,H,t=0;
+function resize(){const r=c.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;c.width=W*d;c.height=H*d;c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);}
+resize();window.addEventListener('resize',resize);
+function draw(){t+=0.03;ctx.clearRect(0,0,W,H);
+  const pts=[[1,1],[-1,1],[-1,-1],[1,-1]];ctx.globalAlpha=0.3;
+  for(let i=0;i<pts.length;i++){const x=W/2+pts[i][0]*50+Math.sin(t+i)*10;const y=H/2+pts[i][1]*30+Math.cos(t*1.3+i)*8;
+    ctx.fillStyle=['#38bdf8','#2dd4bf','#fbbf24','#fb7185'][i];ctx.beginPath();ctx.arc(x,y,6,0,2*Math.PI);ctx.fill();}
+  ctx.globalAlpha=1;requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
+</script>
+</body>
+</html>

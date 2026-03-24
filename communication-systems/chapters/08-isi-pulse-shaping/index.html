@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 8 — ISI &amp; Pulse Shaping | Communication Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><a href="../../index.html" class="sidebar-logo">Comm-Sys</a></div>
+  <ul class="sidebar-nav">
+    <li><a href="../01-am-modulation/index.html">1 — AM Modulation</a></li>
+    <li><a href="../02-dsbsc-ssb-vsb/index.html">2 — DSB-SC / SSB / VSB</a></li>
+    <li><a href="../03-angle-modulation/index.html">3 — Angle Modulation</a></li>
+    <li><a href="../04-sampling-quantization/index.html">4 — Sampling &amp; Quantization</a></li>
+    <li><a href="../05-pulse-modulation/index.html">5 — Pulse Modulation</a></li>
+    <li><a href="../06-pcm/index.html">6 — PCM &amp; TDM</a></li>
+    <li><a href="../07-line-coding/index.html">7 — Line Coding</a></li>
+    <li><a href="../08-isi-pulse-shaping/index.html" class="active">8 — ISI &amp; Pulse Shaping</a></li>
+    <li><a href="../09-digital-receivers/index.html">9 — Digital Receivers</a></li>
+  </ul>
+</nav>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+<div class="progress-bar" id="progress-bar"></div>
+
+<main class="main-content">
+  <div class="content-wrapper">
+    <section class="hero">
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <div class="hero-body">
+        <span class="hero-chip">Chapter 8</span>
+        <h1>ISI &amp; Pulse Shaping</h1>
+        <p>Intersymbol interference, Nyquist ISI criterion, raised cosine filters, root raised cosine, and matched filtering.</p>
+      </div>
+    </section>
+
+    <aside class="toc" id="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#isi">ISI Overview</a></li>
+        <li><a href="#nyquist-criterion">Nyquist Criterion</a></li>
+        <li><a href="#raised-cosine">Raised Cosine</a></li>
+        <li><a href="#root-rc">Root Raised Cosine</a></li>
+        <li><a href="#matched-filter">Matched Filter</a></li>
+        <li><a href="#sim-isi">Sim: ISI Demo</a></li>
+        <li><a href="#sim-rc">Sim: Raised Cosine</a></li>
+        <li><a href="#sim-matched">Sim: Matched Filter</a></li>
+        <li><a href="#quick-ref">Quick Reference</a></li>
+      </ul>
+    </aside>
+
+    <article class="chapter-body">
+      <h2 id="isi">Intersymbol Interference (ISI)</h2>
+      <p><strong>ISI</strong> occurs when the "tail" of one pulse overlaps with adjacent symbol periods, corrupting detection. Sources: band-limited channels, multipath propagation, imperfect filtering.</p>
+      <p>The received signal at sampling instant $t = kT_b$:</p>
+      <div class="eq-card">
+        $$r(kT_b) = a_k\,p(0) + \underbrace{\sum_{n\neq k}a_n\,p((k-n)T_b)}_{\text{ISI}} + n(kT_b)$$
+      </div>
+      <p>For zero ISI, we need the <strong>Nyquist criterion</strong>: $p(nT_b) = 0$ for all $n \neq 0$.</p>
+
+      <h2 id="nyquist-criterion">Nyquist ISI Criterion</h2>
+      <p>A pulse $p(t)$ satisfies the Nyquist criterion for zero ISI if and only if its spectrum satisfies:</p>
+      <div class="eq-card eq-gold">
+        $$\sum_k P\!\left(f - \frac{k}{T_b}\right) = T_b \quad \text{for all } f$$
+      </div>
+      <p>The simplest solution is the ideal sinc pulse ($P(f) = T_b\,\text{rect}(fT_b)$), but it decays as $1/|t|$ — impractical. The <strong>raised cosine</strong> family provides faster decay.</p>
+
+      <h2 id="raised-cosine">Raised Cosine (RC) Filter</h2>
+      <p>The frequency response introduces a smooth rolloff controlled by the <strong>roll-off factor</strong> $\alpha \in [0,1]$:</p>
+      <div class="eq-card eq-highlight">
+        $$H_{RC}(f) = \begin{cases}T_b & |f| \leq \frac{1-\alpha}{2T_b}\\ \frac{T_b}{2}\left[1+\cos\!\left(\frac{\pi T_b}{\alpha}\left(|f|-\frac{1-\alpha}{2T_b}\right)\right)\right] & \frac{1-\alpha}{2T_b}<|f|\leq\frac{1+\alpha}{2T_b}\\0&\text{otherwise}\end{cases}$$
+      </div>
+      <p>The corresponding impulse response:</p>
+      <div class="eq-card eq-highlight">
+        $$p(t) = \text{sinc}\!\left(\frac{t}{T_b}\right)\frac{\cos(\pi\alpha t/T_b)}{1-(2\alpha t/T_b)^2}$$
+      </div>
+      <p>Properties:</p>
+      <ul>
+        <li>$\alpha = 0$: Minimum bandwidth $1/(2T_b)$, slowest decay ($\sim 1/|t|$)</li>
+        <li>$\alpha = 1$: Maximum bandwidth $1/T_b$, fastest decay ($\sim 1/|t|^3$) — most practical</li>
+        <li>Bandwidth: $B = (1+\alpha)/(2T_b)$</li>
+      </ul>
+      <div class="eq-card">
+        $$B_{RC} = \frac{1+\alpha}{2T_b} = \frac{R_s(1+\alpha)}{2}$$
+      </div>
+
+      <h2 id="root-rc">Root Raised Cosine (RRC)</h2>
+      <p>In practice, the raised cosine is split between transmitter and receiver: $H_{TX}(f) = H_{RX}(f) = \sqrt{H_{RC}(f)}$.</p>
+      <div class="eq-card eq-highlight">
+        $$H_{RRC}(f) = \sqrt{H_{RC}(f)}$$
+      </div>
+      <p>This achieves:</p>
+      <ul>
+        <li>Zero ISI at the cascade output: $H_{TX}(f)\cdot H_{RX}(f) = H_{RC}(f)$</li>
+        <li>Matched filtering at the receiver (optimal for AWGN)</li>
+      </ul>
+
+      <h2 id="matched-filter">Matched Filter</h2>
+      <p>The <strong>matched filter</strong> maximizes the output SNR at the sampling instant. For a transmitted pulse $s(t)$:</p>
+      <div class="eq-card eq-gold">
+        $$h_{MF}(t) = s(T_b - t) \qquad H_{MF}(f) = S^*(f)\,e^{-j2\pi f T_b}$$
+      </div>
+      <p>Maximum output SNR:</p>
+      <div class="eq-card eq-highlight">
+        $$\text{SNR}_{max} = \frac{2E_b}{N_0}$$
+      </div>
+      <p>where $E_b$ is the energy per bit and $N_0/2$ is the two-sided noise PSD. This is the <em>best achievable</em> SNR — independent of pulse shape.</p>
+      <details class="collapsible">
+        <summary>Derivation: Matched filter optimality</summary>
+        <div class="derivation-steps">
+          <p>The output at $t = T_b$:</p>
+          $$y(T_b) = \int_{-\infty}^{\infty}S(f)H(f)\,e^{j2\pi fT_b}df$$
+          <p>Noise power at output:</p>
+          $$\sigma_n^2 = \frac{N_0}{2}\int|H(f)|^2 df$$
+          <p>By the Cauchy-Schwarz inequality:</p>
+          $$\text{SNR} = \frac{|y(T_b)|^2}{\sigma_n^2} \leq \frac{2}{N_0}\int|S(f)|^2 df = \frac{2E_s}{N_0}$$
+          <p>Equality holds when $H(f) = kS^*(f)e^{-j2\pi fT_b}$, i.e., the matched filter.</p>
+        </div>
+      </details>
+
+      <!-- ━━━ Simulations ━━━ -->
+      <h2 id="sim-isi">Simulation — ISI Demo</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Roll-off α:
+            <input type="range" id="isi-alpha" min="0" max="1" step="0.05" value="0">
+            <span id="isi-alpha-val">0</span>
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="isi-pulse" value="sinc" checked> Sinc</label>
+            <label><input type="radio" name="isi-pulse" value="rc"> Raised Cosine</label>
+          </div>
+        </div>
+        <canvas id="isi-canvas"></canvas>
+        <div class="sim-readouts">
+          <span><strong id="isi-status">Pure sinc — zero ISI at sample points</strong></span>
+        </div>
+      </div>
+
+      <h2 id="sim-rc">Simulation — Raised Cosine Filter</h2>
+      <div class="sim-panel">
+        <div class="chart-container">
+          <canvas id="rc-time-chart"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="rc-freq-chart"></canvas>
+        </div>
+      </div>
+
+      <h2 id="sim-matched">Simulation — Matched Filter</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>SNR (dB):
+            <input type="range" id="matched-snr" min="-5" max="20" step="1" value="10">
+            <span id="matched-snr-val">10</span>
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="matched-pulse" value="rect" checked> Rectangular</label>
+            <label><input type="radio" name="matched-pulse" value="rc"> Raised Cosine</label>
+          </div>
+          <button id="matched-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="matched-canvas"></canvas>
+        <div class="sim-readouts">
+          <span>P<sub>e</sub> ≈ <strong id="matched-pe">—</strong></span>
+        </div>
+      </div>
+
+      <h2 id="quick-ref">Quick Reference</h2>
+      <table class="ref-table">
+        <thead><tr><th>Quantity</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><td>Nyquist criterion</td><td>$p(nT_b)=\delta[n]$</td></tr>
+          <tr><td>RC bandwidth</td><td>$(1+\alpha)/(2T_b)$</td></tr>
+          <tr><td>RC pulse decay</td><td>$\sim 1/|t|^3$ for $\alpha=1$</td></tr>
+          <tr><td>RRC split</td><td>$H_{RRC}=\sqrt{H_{RC}}$</td></tr>
+          <tr><td>Matched filter</td><td>$h(t)=s(T_b-t)$</td></tr>
+          <tr><td>Max output SNR</td><td>$2E_b/N_0$</td></tr>
+          <tr><td>BER (BPSK, MF)</td><td>$Q(\sqrt{2E_b/N_0})$</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/isi-demo.js"></script>
+<script src="sim/raised-cosine.js"></script>
+<script src="sim/matched-filter.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});});</script>
+<script>
+(function(){const c=document.getElementById('hero-canvas');if(!c)return;const ctx=c.getContext('2d');let W,H,t=0;
+function resize(){const r=c.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;c.width=W*d;c.height=H*d;c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);}
+resize();window.addEventListener('resize',resize);
+function draw(){t+=0.02;ctx.clearRect(0,0,W,H);const colors=['#38bdf8','#fbbf24','#2dd4bf'];
+  for(let k=0;k<3;k++){ctx.strokeStyle=colors[k];ctx.lineWidth=1.5;ctx.globalAlpha=0.3;ctx.beginPath();
+    for(let x=0;x<W;x++){const tt=x/60+t+k*2;const y=H/2+25*Math.sin(tt)*Math.cos(tt*0.3)/(1+0.1*Math.pow(tt-W/120,2))*Math.cos(k);
+      if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}ctx.globalAlpha=1;requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
+</script>
+</body>
+</html>
