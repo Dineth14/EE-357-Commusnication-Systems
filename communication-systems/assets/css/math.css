@@ -1,0 +1,116 @@
+/* ============================================================
+   KaTeX Overrides & Equation Box Styles
+   ============================================================ */
+
+/* Block equations */
+.katex-display {
+  margin: 1.25rem 0;
+  padding: 0.75rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.katex-display > .katex {
+  text-align: center;
+}
+
+/* Inline equations */
+.katex {
+  font-size: 1.05em;
+}
+
+/* Equation numbering */
+.eq-numbered {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.eq-numbered .eq-num {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Equation highlight boxes */
+.eq-highlight {
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.eq-highlight .katex-display {
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+/* Gold highlight for key results */
+.eq-gold {
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-left: 4px solid var(--accent-amber);
+}
+
+/* Rose highlight for warnings/important */
+.eq-rose {
+  background: rgba(251, 113, 133, 0.06);
+  border: 1px solid rgba(251, 113, 133, 0.2);
+  border-left: 4px solid var(--accent-rose);
+}
+
+/* Derivation step styling */
+.derivation-step {
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--grid-lines);
+  margin: 0.75rem 0;
+}
+
+.derivation-step .step-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-teal);
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+/* Light theme overrides */
+:root[data-theme="light"] .eq-highlight {
+  background: rgba(56, 189, 248, 0.08);
+}
+:root[data-theme="light"] .eq-gold {
+  background: rgba(251, 191, 36, 0.08);
+}
+:root[data-theme="light"] .eq-rose {
+  background: rgba(251, 113, 133, 0.08);
+}
+
+/* Ensure KaTeX uses theme colors */
+.katex { color: var(--text-primary); }
+.katex .mord { color: var(--text-primary); }
+
+/* Equation tooltip */
+[data-eq-tooltip] {
+  position: relative;
+  cursor: help;
+}
+[data-eq-tooltip]:hover::after {
+  content: attr(data-eq-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--grid-lines);
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
