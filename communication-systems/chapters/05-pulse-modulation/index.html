@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 5 — Pulse Modulation | Communication Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><a href="../../index.html" class="sidebar-logo">Comm-Sys</a></div>
+  <ul class="sidebar-nav">
+    <li><a href="../01-am-modulation/index.html">1 — AM Modulation</a></li>
+    <li><a href="../02-dsbsc-ssb-vsb/index.html">2 — DSB-SC / SSB / VSB</a></li>
+    <li><a href="../03-angle-modulation/index.html">3 — Angle Modulation</a></li>
+    <li><a href="../04-sampling-quantization/index.html">4 — Sampling &amp; Quantization</a></li>
+    <li><a href="../05-pulse-modulation/index.html" class="active">5 — Pulse Modulation</a></li>
+    <li><a href="../06-pcm/index.html">6 — PCM &amp; TDM</a></li>
+    <li><a href="../07-line-coding/index.html">7 — Line Coding</a></li>
+    <li><a href="../08-isi-pulse-shaping/index.html">8 — ISI &amp; Pulse Shaping</a></li>
+    <li><a href="../09-digital-receivers/index.html">9 — Digital Receivers</a></li>
+  </ul>
+</nav>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+<div class="progress-bar" id="progress-bar"></div>
+
+<main class="main-content">
+  <div class="content-wrapper">
+    <section class="hero">
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <div class="hero-body">
+        <span class="hero-chip">Chapter 5</span>
+        <h1>Pulse Modulation</h1>
+        <p>PAM, PWM (PDM), PPM — analog pulse modulation techniques that encode information in pulse amplitude, width, or position.</p>
+      </div>
+    </section>
+
+    <aside class="toc" id="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#pam">PAM</a></li>
+        <li><a href="#pwm">PWM (PDM)</a></li>
+        <li><a href="#ppm">PPM</a></li>
+        <li><a href="#comparison">Comparison</a></li>
+        <li><a href="#sim-pam">Sim: PAM</a></li>
+        <li><a href="#sim-pdm">Sim: PWM / PPM</a></li>
+        <li><a href="#sim-ppm">Sim: PPM Detail</a></li>
+        <li><a href="#quick-ref">Quick Reference</a></li>
+      </ul>
+    </aside>
+
+    <article class="chapter-body">
+      <h2 id="overview">Overview</h2>
+      <p>Pulse modulation techniques represent <em>analog</em> information using discrete pulses. Unlike PCM (Chapter 6), these are still analog-to-analog representations — the information resides in a continuous parameter of the pulse train.</p>
+      <ul>
+        <li><strong>PAM</strong> — Pulse Amplitude Modulation: information in pulse heights</li>
+        <li><strong>PWM/PDM</strong> — Pulse Width/Duration Modulation: information in pulse widths</li>
+        <li><strong>PPM</strong> — Pulse Position Modulation: information in pulse positions</li>
+      </ul>
+
+      <h2 id="pam">Pulse Amplitude Modulation (PAM)</h2>
+      <p>PAM is the simplest form — the amplitude of each pulse is proportional to the message signal at the sampling instant:</p>
+      <div class="eq-card eq-highlight">
+        $$s_{PAM}(t)=\sum_{n}m(nT_s)\,p(t-nT_s)$$
+      </div>
+      <p>Two forms exist:</p>
+      <ul>
+        <li><strong>Natural PAM:</strong> Pulse tops follow the signal shape (natural sampling)</li>
+        <li><strong>Flat-top PAM:</strong> Pulse tops are flat at the sampled value (sample-and-hold)</li>
+      </ul>
+      <p>PAM is the basis for all other pulse modulation schemes and is the first step in PCM encoding.</p>
+      <details class="collapsible">
+        <summary>PAM spectrum analysis</summary>
+        <div class="derivation-steps">
+          <p>For flat-top PAM with pulse width $\tau$:</p>
+          $$S_{PAM}(f)=\tau\,\text{sinc}(f\tau)\cdot f_s\sum_n M(f-nf_s)$$
+          <p>The sinc envelope causes aperture distortion that increases with $\tau$. Equalization filter: $H_{eq}(f)=\frac{1}{\text{sinc}(f\tau)}$ for $|f|\le f_m$.</p>
+        </div>
+      </details>
+
+      <h2 id="pwm">Pulse Width Modulation (PWM / PDM)</h2>
+      <p>In PWM, the width (duration) of each pulse is proportional to the message amplitude:</p>
+      <div class="eq-card">
+        $$\tau_n = \tau_0\bigl[1 + k_w\,m(nT_s)\bigr]$$
+      </div>
+      <p>where $\tau_0$ is the unmodulated pulse width and $k_w$ is the modulation sensitivity. Advantages:</p>
+      <ul>
+        <li>Constant amplitude → easy to regenerate (noise immune pulse shape)</li>
+        <li>Information in pulse edges → simple demodulation by integration</li>
+      </ul>
+      <p>Demodulation: integrate each pulse period. The integral is proportional to the pulse width, hence to $m(nT_s)$.</p>
+      <div class="eq-card eq-rose">
+        <strong>Bandwidth:</strong> PWM requires higher bandwidth than PAM due to the fast rise/fall edges needed to accurately encode width information.
+      </div>
+
+      <h2 id="ppm">Pulse Position Modulation (PPM)</h2>
+      <p>In PPM, the position (time shift) of each pulse relative to a reference is proportional to the message:</p>
+      <div class="eq-card eq-highlight">
+        $$\delta_n = k_p\,m(nT_s)$$
+      </div>
+      <p>where $\delta_n$ is the time shift of the $n$-th pulse. PPM can be derived from PWM by differentiating the PWM signal and keeping only the trailing edges.</p>
+      <p>PPM advantages over PWM:</p>
+      <ul>
+        <li>Higher power efficiency (constant, narrow pulses)</li>
+        <li>Better noise performance (timing jitter easier to combat than width distortion)</li>
+      </ul>
+      <p>PPM disadvantage: requires synchronization — the receiver must know the reference positions.</p>
+
+      <h2 id="comparison">Comparison</h2>
+      <table class="ref-table">
+        <thead><tr><th>Property</th><th>PAM</th><th>PWM</th><th>PPM</th></tr></thead>
+        <tbody>
+          <tr><td>Information in</td><td>Amplitude</td><td>Width</td><td>Position</td></tr>
+          <tr><td>Bandwidth</td><td>Low</td><td>High</td><td>High</td></tr>
+          <tr><td>Noise immunity</td><td>Poor</td><td>Good</td><td>Best</td></tr>
+          <tr><td>Power efficiency</td><td>Low</td><td>Medium</td><td>High</td></tr>
+          <tr><td>Complexity</td><td>Simple</td><td>Moderate</td><td>Complex (needs sync)</td></tr>
+          <tr><td>Derived from</td><td>Sampling</td><td>PAM + comparator</td><td>PWM differentiation</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ━━━ Simulations ━━━ -->
+      <h2 id="sim-pam">Simulation — PAM</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>f<sub>s</sub>:
+            <input type="range" id="pam-fs" min="2" max="30" step="1" value="10">
+            <span id="pam-fs-val">10</span> Hz
+          </label>
+          <div class="toggle-group">
+            <label><input type="radio" name="pam-type" value="natural" checked> Natural</label>
+            <label><input type="radio" name="pam-type" value="flat-top"> Flat-Top</label>
+          </div>
+          <button id="pam-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="pam-canvas"></canvas>
+      </div>
+
+      <h2 id="sim-pdm">Simulation — PWM &amp; PPM</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>f<sub>s</sub>:
+            <input type="range" id="pdm-fs" min="5" max="30" step="1" value="15">
+            <span id="pdm-fs-val">15</span> Hz
+          </label>
+          <button id="pdm-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="pdm-canvas"></canvas>
+      </div>
+
+      <h2 id="sim-ppm">Simulation — PPM Detail</h2>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <label>Max shift:
+            <input type="range" id="ppm-maxshift" min="0.05" max="0.8" step="0.05" value="0.4">
+            <span id="ppm-maxshift-val">0.4</span> T<sub>s</sub>
+          </label>
+          <button id="ppm-play-btn" class="sim-btn">⏸ Pause</button>
+        </div>
+        <canvas id="ppm-canvas"></canvas>
+      </div>
+
+      <h2 id="quick-ref">Quick Reference</h2>
+      <table class="ref-table">
+        <thead><tr><th>Quantity</th><th>Expression / Note</th></tr></thead>
+        <tbody>
+          <tr><td>PAM signal</td><td>$\sum_n m(nT_s)\,p(t-nT_s)$</td></tr>
+          <tr><td>PWM pulse width</td><td>$\tau_n = \tau_0[1 + k_w\,m(nT_s)]$</td></tr>
+          <tr><td>PPM time shift</td><td>$\delta_n = k_p\,m(nT_s)$</td></tr>
+          <tr><td>PAM BW</td><td>$\approx f_s/2$ (Nyquist)</td></tr>
+          <tr><td>PWM demod</td><td>Integrate over pulse → proportional to width</td></tr>
+          <tr><td>PPM → PWM</td><td>Differentiate PWM trailing edge</td></tr>
+          <tr><td>Best noise immunity</td><td>PPM &gt; PWM &gt; PAM</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/pam.js"></script>
+<script src="sim/pdm-pwm.js"></script>
+<script src="sim/ppm.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});});</script>
+<script>
+(function(){const c=document.getElementById('hero-canvas');if(!c)return;const ctx=c.getContext('2d');let W,H,t=0;
+function resize(){const r=c.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;c.width=W*d;c.height=H*d;c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);}
+resize();window.addEventListener('resize',resize);
+function draw(){t+=0.02;ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#fbbf24';ctx.lineWidth=2;ctx.globalAlpha=0.5;
+  for(let i=0;i<15;i++){const x=((i/15)*W+t*30)%W;const h=20+30*Math.sin(t+i*0.5);
+    ctx.beginPath();ctx.moveTo(x,H/2+h);ctx.lineTo(x,H/2-h);ctx.stroke();}
+  ctx.globalAlpha=1;requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
+</script>
+</body>
+</html>
